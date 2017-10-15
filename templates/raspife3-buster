@@ -1,29 +1,29 @@
-# Configuration file raspi3 Buster IFÉ 2017/07/26
+# Configuration file raspi3 Buster IFÉ 2017/09/1
 #
 APT_SERVER=ftp.fr.debian.org 
-APT_INCLUDES="gnupg,gnupg2,firmware-linux-nonfree,firmware-linux,dh-autoreconf,\
+APT_INCLUDES="gnupg,firmware-linux-nonfree,firmware-linux,dh-autoreconf,\
 gettext,build-essential,git,cmake,libjson-c-dev,unzip,usbutils,\
 bison,libboost-all-dev,automake,autoconf,autogen,libtool,libtool-bin,\
 pkg-config,checkinstall,menulibre,libnotify-bin,pandoc,\
 python3,python3-dev,python3-pypandoc,python3-scipy,python3-tk,python3-pandocfilters,\
-python,python-dev,python-pypandoc,python-scipy,python-tk,python-pandocfilters,\
 python3-geopy,python3-pip,\
-python-geopy,python-pip,\
+python,python-dev,python-pypandoc,python-scipy,python-tk,python-pandocfilters,\
+python-geopy,python-pip,python-tk,pandoc,\
 python-configobj,python-cheetah,python-imaging,python-serial,python-usb,\
 pcre2-utils,libpcre++-dev,libpcre2-dev,libjpeg-dev,jed,i2c-tools,python-smbus,policykit-1,\
-pmount,ntpdate,\
+pmount,ntpdate,ntp,\
 texlive,texlive-xetex,nginx-extras,ffmpeg,wicd,wicd-gtk,console-data,keyboard-configuration,\
 icedtea-8-plugin,openjdk-8-jdk,openjdk-8-jre,openjdk-8-jre-headless,libqtwebkit-dev,libqt5webkit5-dev,\
 libudev-dev,libzzip-dev,zlib1g-dev,libcanberra-gtk-module,libnss-myhostname,libfreetype6-dev,libpng16-16,\
-nmap,libltdl-dev,dbus-user-session,debian-archive-keyring,\
-xutils-dev,lxsession,openbox-lxde-session,lxde,x11proto-randr-dev,lxrandr,\
-tightvncserver,geany,geany-plugin-py,geany-plugin-markdown,firefox-esr,firefox-esr-l10n-fr"
+nmap,libltdl-dev,dbus-user-session,debian-archive-keyring"
+APT_INCLUDES_LATE="xutils-dev,lxsession,openbox-lxde-session,lxde,x11proto-randr-dev,lxrandr,\
+tightvncserver,geany,geany-plugin-py,firefox-esr,firefox-esr-l10n-fr"
 #----------------------
 RPI_MODEL=3 
 RELEASE="buster" 
 HOSTNAME="raspife3" 
-PASSWORD="***********"
-USER_PASSWORD="***********"
+PASSWORD="AChanger1$"
+USER_PASSWORD="AChanger1$"
 DEFLOCAL="fr_FR.UTF-8" 
 TIMEZONE="Europe/Paris"
 EXPANDROOT=false
@@ -64,10 +64,11 @@ ENABLE_IFNAMES=true
 #------------------------
 ENABLE_ROOT_SSH=false  
 SSH_LIMIT_USERS=false
-SSH_ROOT_PUB_KEY="/home/*******/.ssh/authorized_keys"
-SSH_USER_PUB_KEY="/home/*******/.ssh/authorized_keys"
+SSH_ROOT_PUB_KEY="/home/vidal/.ssh/authorized_keys"
+SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 #------------------------
-BUILD_KERNEL=true 
+BUILD_KERNEL=true
+KERNEL_BRANCH=rpi-4.12.y
 KERNEL_REDUCE=false
 KERNEL_HEADERS=true
 KERNEL_REMOVESRC=true
@@ -85,6 +86,7 @@ REDUCE_LOCALE=false
 ENABLE_CRYPTFS=false
 #-------------------------
 BASEDIR=/data/RpiGenImage/Images/${RELEASE}
+#BASEDIR=/media/vidal/ExternGV/Nano-Ordinateurs/RaspberryPi/RpiGenImage/Images/${RELEASE}
 DATE=`date +%Y-%m-%d`
 IMAGE_NAME=${BASEDIR}/${DATE}-rpi${RPI_MODEL}-${RELEASE}
 
