@@ -4,7 +4,7 @@ APT_SERVER=ftp.fr.debian.org
 APT_INCLUDES="debian-archive-keyring,debian-keyring,automake,autoconf,autogen,gawk,gnupg,gnupg2,\
 build-essential,git,cmake,libjson-c-dev,unzip,\
 bison,libboost-all-dev,libtool,libtool-bin,pkg-config,checkinstall,libnotify-bin,pandoc,\
-python3,python3-dev,python,python-dev,python-configobj,python-cheetah,\
+python3,python3-dev,python,python-dev,python-configobj,python-cheetah,python-mysqldb\
 python-imaging,python-serial,python-usb,python-tk,python3-tk,python3-scipy,\
 python-pypandoc,python3-pypandoc,python-pandocfilters,python3-pandocfilters,\
 python-geopy,python3-geopy,python-pip,python3-pip,python-smbus,\
