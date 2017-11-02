@@ -1,4 +1,4 @@
-# Configuration file raspi3 Buster IFÉ 2017/09/1
+# Configuration file raspi3 Buster IFÉ 2017/11/01
 #
 APT_SERVER=ftp.fr.debian.org 
 APT_INCLUDES="gnupg,firmware-linux-nonfree,firmware-linux,dh-autoreconf,\
@@ -20,7 +20,8 @@ APT_INCLUDES_LATE="xutils-dev,lxsession,openbox-lxde-session,lxde,x11proto-randr
 tightvncserver,geany,geany-plugin-py,firefox-esr,firefox-esr-l10n-fr"
 #----------------------
 RPI_MODEL=3 
-RELEASE="buster" 
+RELEASE="buster"
+RELEASE_ARCH="armhf"
 HOSTNAME="raspife3" 
 PASSWORD="AChanger1$"
 USER_PASSWORD="AChanger1$"
@@ -68,7 +69,8 @@ SSH_ROOT_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 #------------------------
 BUILD_KERNEL=true
-KERNEL_BRANCH=rpi-4.12.y
+KERNEL_IMAGE="kernel10.img"
+KERNEL_BRANCH=rpi-4.13.y
 KERNEL_REDUCE=false
 KERNEL_HEADERS=true
 KERNEL_REMOVESRC=true
