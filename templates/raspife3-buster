@@ -68,7 +68,7 @@ SSH_ROOT_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 #------------------------
 BUILD_KERNEL=true
-KERNEL_BRANCH=rpi-4.12.y
+KERNEL_BRANCH=rpi-4.13.y
 KERNEL_REDUCE=false
 KERNEL_HEADERS=true
 KERNEL_REMOVESRC=true
