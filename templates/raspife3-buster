@@ -28,8 +28,8 @@ RPI_MODEL=3
 RELEASE="buster"
 RELEASE_ARCH="armhf"
 HOSTNAME="raspife3" 
-PASSWORD="AChanger1$"
-USER_PASSWORD="AChanger1$"
+PASSWORD="***********"
+USER_PASSWORD="*************"
 DEFLOCAL="fr_FR.UTF-8" 
 TIMEZONE="Europe/Paris"
 EXPANDROOT=false
@@ -70,8 +70,8 @@ ENABLE_IFNAMES=true
 #------------------------
 ENABLE_ROOT_SSH=false  
 SSH_LIMIT_USERS=false
-SSH_ROOT_PUB_KEY="/home/vidal/.ssh/authorized_keys"
-SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
+SSH_ROOT_PUB_KEY="/home/*****/.ssh/authorized_keys"
+SSH_USER_PUB_KEY="/home/*****/.ssh/authorized_keys"
 #------------------------
 BUILD_KERNEL=true
 KERNEL_IMAGE="kernel10.img"
@@ -93,7 +93,7 @@ REDUCE_LOCALE=false
 ENABLE_CRYPTFS=false
 #-------------------------
 BASEDIR=/data/RpiGenImage/Images/${RELEASE}
-#BASEDIR=/media/vidal/ExternGV/Nano-Ordinateurs/RaspberryPi/RpiGenImage/Images/${RELEASE}
+#BASEDIR=/media/*******/*********/Nano-Ordinateurs/RaspberryPi/RpiGenImage/Images/${RELEASE}
 DATE=`date +%Y-%m-%d`
 IMAGE_NAME=${BASEDIR}/${DATE}-rpi${RPI_MODEL}-${RELEASE}
 
