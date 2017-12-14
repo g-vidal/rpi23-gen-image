@@ -2,7 +2,6 @@
 #
 APT_SERVER=debian.mirrors.ovh.net
 APT_INCLUDES=""
-APT_INCLUDES_LATE=""
 APT_INCLUDES_LATE="gnupg,firmware-linux-nonfree,firmware-linux,dh-autoreconf,\
 gettext,build-essential,git,cmake,libjson-c-dev,unzip,usbutils,\
 bison,libboost-all-dev,automake,autoconf,autogen,libtool,libtool-bin,\
@@ -19,7 +18,7 @@ libqtwebkit-dev,libqt5webkit5-dev,\
 libudev-dev,libzzip-dev,zlib1g-dev,libcanberra-gtk-module,libnss-myhostname,libfreetype6-dev,libpng16-16,\
 nmap,libltdl-dev,dbus-user-session,debian-archive-keyring,\
 xutils-dev,lxsession,openbox-lxde-session,lxde,x11proto-randr-dev,lxrandr,\
-tightvncserver,geany,geany-plugin-py,firefox-esr,firefox-esr-l10n-fr,jed"
+tightvncserver,geany,geany-plugin-py,firefox-esr,firefox-esr-l10n-fr,jed,terminator,automake"
 #ca-certificates-java,icedtea-plugin,icedtea-netx,\
 #openjdk-8-jdk,openjdk-8-jre,openjdk-8-jre-headless,\
 #openjdk-9-jdk,openjdk-9-jre,openjdk-9-jre-headless"
@@ -74,7 +73,6 @@ SSH_ROOT_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 #------------------------
 BUILD_KERNEL=true
-KERNEL_IMAGE="kernel10.img"
 KERNEL_BRANCH=rpi-4.13.y
 KERNEL_REDUCE=false
 KERNEL_HEADERS=true
