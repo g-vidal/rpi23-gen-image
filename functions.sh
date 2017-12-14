@@ -66,6 +66,8 @@ chroot_install_cc() {
 
     if [ "$RELEASE" = "jessie" ] || [ "$RELEASE" = "stretch" ] || [ "$RELEASE" = "buster" ] ; then
       chroot_exec apt-get -q -y --no-install-recommends install ${COMPILER_PACKAGES}
+    elif [ "$RELEASE" = "stretch" ] || [ "$RELEASE" = "buster" ] ; then
+      chroot_exec apt-get -q -y --allow-unauthenticated --no-install-recommends install ${COMPILER_PACKAGES}
     fi
   fi
 }
