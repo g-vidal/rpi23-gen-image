@@ -466,6 +466,10 @@ if [ "$ENABLE_REDUCE" = true ] ; then
   fi
 fi
 
+if [ "$RELEASE" != "jessie" ] ; then
+  APT_INCLUDES="${APT_INCLUDES},libnss-systemd"
+fi
+
 # Configure kernel sources if no KERNELSRC_DIR
 if [ "$BUILD_KERNEL" = true ] && [ -z "$KERNELSRC_DIR" ] ; then
   KERNELSRC_CONFIG=true
@@ -552,8 +556,8 @@ ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS})
 
 # The root partition is EXT4
 # This means more space than the actual used space of the chroot is used.
-# As overhead for journaling and reserved blocks 25% are added.
-ROOT_SECTORS=$(expr $(expr ${CHROOT_SIZE} + ${CHROOT_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
+# As overhead for journaling and reserved blocks 35% are added.
+ROOT_SECTORS=$(expr $(expr ${CHROOT_SIZE} + ${CHROOT_SIZE} \/ 100 \* 35) \* 1024 \/ 512)
 
 # Calculate required image size in 512 Byte sectors
 IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS})
