@@ -70,7 +70,7 @@ KERNEL_BRANCH=${KERNEL_BRANCH:=""}
 # URLs
 KERNEL_URL=${KERNEL_URL:=https://github.com/raspberrypi/linux}
 FIRMWARE_URL=${FIRMWARE_URL:=https://github.com/raspberrypi/firmware/raw/master/boot}
-WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm80211/brcm}
+WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm}
 COLLABORA_URL=${COLLABORA_URL:=https://repositories.collabora.co.uk/debian}
 FBTURBO_URL=${FBTURBO_URL:=https://github.com/ssvb/xf86-video-fbturbo.git}
 UBOOT_URL=${UBOOT_URL:=git://git.denx.de/u-boot.git}
@@ -450,7 +450,7 @@ fi
 
 # Add xorg package
 if [ "$ENABLE_XORG" = true ] ; then
-  APT_INCLUDES="${APT_INCLUDES},xorg"
+  APT_INCLUDES="${APT_INCLUDES},xorg,dbus-x11"
 fi
 
 # Replace selected packages with smaller clones
@@ -464,6 +464,10 @@ if [ "$ENABLE_REDUCE" = true ] ; then
   if [ "$REDUCE_SSHD" = true ] ; then
     APT_INCLUDES="$(echo ${APT_INCLUDES} | sed "s/openssh-server/dropbear/")"
   fi
+fi
+
+if [ "$RELEASE" != "jessie" ] ; then
+  APT_INCLUDES="${APT_INCLUDES},libnss-systemd"
 fi
 
 # Configure kernel sources if no KERNELSRC_DIR
@@ -552,8 +556,8 @@ ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS})
 
 # The root partition is EXT4
 # This means more space than the actual used space of the chroot is used.
-# As overhead for journaling and reserved blocks 25% are added.
-ROOT_SECTORS=$(expr $(expr ${CHROOT_SIZE} + ${CHROOT_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
+# As overhead for journaling and reserved blocks 35% are added.
+ROOT_SECTORS=$(expr $(expr ${CHROOT_SIZE} + ${CHROOT_SIZE} \/ 100 \* 35) \* 1024 \/ 512)
 
 # Calculate required image size in 512 Byte sectors
 IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS})
