@@ -68,7 +68,14 @@ A comma separated list of additional packages to be installed by apt after boots
 
 #### General system settings:
 ##### `RPI_MODEL`=2
-Specifiy the target Raspberry Pi hardware model. The script at this time supports the Raspberry Pi models `2` and `3`. `BUILD_KERNEL`=true will automatically be set if the Raspberry Pi model `3` is used.
+Specifiy the target Raspberry Pi hardware model. The script at this time supports the following Raspberry Pi models:
+`0`  = Used for Raspberry Pi 0 and Raspberry Pi 0 W
+`1`  = Used for Pi 1 model A and B
+`1P` = Used for Pi 1 model B+ and A+
+`2`  = Used for Pi 2 model B
+`3`  = Used for Pi 3 model B
+`3P` = Used for Pi 3 model B+
+`BUILD_KERNEL`=true will automatically be set if the Raspberry Pi model `3` or `3P` is used.
 
 ##### `RELEASE`="jessie"
 Set the desired Debian release name. The script at this time supports the bootstrapping of the Debian releases "jessie", "stretch" and "buster". `BUILD_KERNEL`=true will automatically be set if the Debian releases `stretch` or `buster` are used.
@@ -93,6 +100,9 @@ Set default system timezone. All available timezones can be found in the `/usr/s
 
 ##### `EXPANDROOT`=true
 Expand the root partition and filesystem automatically on first boot.
+
+##### `ENABLE_QEMU`=false
+Generate kernel (`vexpress_defconfig`), file system image (`qcow2`) and DTB files that can be used for QEMU full system emulation (`vexpress-A15`). The output files are stored in the `$(pwd)/images/qemu` directory. You can find more information about running the generated image in the QEMU section of this readme file.
 
 ---
 
@@ -152,10 +162,10 @@ Set the IP address for the second NTP server.
 Enable serial console interface. Recommended if no monitor or keyboard is connected to the RPi2/3. In case of problems fe. if the network (auto) configuration failed - the serial console can be used to access the system.
 
 ##### `ENABLE_I2C`=false
-Enable I2C interface on the RPi2/3. Please check the [RPi2/3 pinout diagrams](http://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
+Enable I2C interface on the RPi2/3. Please check the [RPi2/3 pinout diagrams](https://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
 
 ##### `ENABLE_SPI`=false
-Enable SPI interface on the RPi2/3. Please check the [RPi2/3 pinout diagrams](http://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
+Enable SPI interface on the RPi2/3. Please check the [RPi2/3 pinout diagrams](https://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
 
 ##### `ENABLE_IPV6`=true
 Enable IPv6 support. The network interface configuration is managed via systemd-networkd.
@@ -201,10 +211,10 @@ Use debootstrap script variant `minbase` which only includes essential packages 
 Reduce the disk space usage by deleting packages and files. See `REDUCE_*` parameters for detailed information.
 
 ##### `ENABLE_UBOOT`=false
-Replace the default RPi2/3 second stage bootloader (bootcode.bin) with [U-Boot bootloader](http://git.denx.de/?p=u-boot.git;a=summary). U-Boot can boot images via the network using the BOOTP/TFTP protocol.
+Replace the default RPi2/3 second stage bootloader (bootcode.bin) with [U-Boot bootloader](https://git.denx.de/?p=u-boot.git;a=summary). U-Boot can boot images via the network using the BOOTP/TFTP protocol.
 
 ##### `UBOOTSRC_DIR`=""
-Path to a directory (`u-boot`) of [U-Boot bootloader sources](http://git.denx.de/?p=u-boot.git;a=summary) that will be copied, configured, build and installed inside the chroot.
+Path to a directory (`u-boot`) of [U-Boot bootloader sources](https://git.denx.de/?p=u-boot.git;a=summary) that will be copied, configured, build and installed inside the chroot.
 
 ##### `ENABLE_FBTURBO`=false
 Install and enable the [hardware accelerated Xorg video driver](https://github.com/ssvb/xf86-video-fbturbo) `fbturbo`. Please note that this driver is currently limited to hardware accelerated window moving and scrolling.
@@ -295,6 +305,12 @@ Install kernel headers with built kernel.
 
 ##### `KERNEL_MENUCONFIG`=false
 Start `make menuconfig` interactive menu-driven kernel configuration. The script will continue after `make menuconfig` was terminated.
+
+##### `KERNEL_OLDDEFCONFIG`=false
+Run `make olddefconfig` to automatically set all new kernel configuration options to their recommended default values.
+
+##### `KERNEL_CCACHE`=false
+Compile the kernel using ccache. This speeds up kernel recompilation by caching previous compilations and detecting when the same compilation is being done again.
 
 ##### `KERNEL_REMOVESRC`=true
 Remove all kernel sources from the generated OS image after it was built and installed.
@@ -437,6 +453,28 @@ If you have set `ENABLE_SPLITFS`, copy the `-frmw` image on the microSD card, th
 bmaptool copy ./images/jessie/2017-01-23-rpi3-jessie-frmw.img /dev/mmcblk0
 bmaptool copy ./images/jessie/2017-01-23-rpi3-jessie-root.img /dev/sdc
 ```
+
+## QEMU emulation
+Start QEMU full system emulation:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -append "root=/dev/mmcblk0p2 rw rootfstype=ext4 console=tty1"
+```
+
+Start QEMU full system emulation and output to console:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -append "root=/dev/mmcblk0p2 rw rootfstype=ext4 console=ttyAMA0,115200 init=/bin/systemd" -serial stdio
+```
+
+Start QEMU full system emulation with SMP and output to console:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -smp cpus=2,maxcpus=2 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -append "root=/dev/mmcblk0p2 rw rootfstype=ext4 console=ttyAMA0,115200 init=/bin/systemd" -serial stdio
+```
+
+Start QEMU full system emulation with cryptfs, initramfs and output to console:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -initrd "initramfs-${KERNEL_VERSION}" -append "root=/dev/mapper/secure cryptdevice=/dev/mmcblk0p2:secure rw rootfstype=ext4 console=ttyAMA0,115200 init=/bin/systemd" -serial stdio
+```
+
 ## Weekly image builds
 The image files are provided by JRWR'S I/O PORT and are built once a Sunday at midnight UTC!
 * [Debian Stretch Raspberry Pi2/3 Weekly Image Builds](https://jrwr.io/doku.php?id=projects:debianpi)
@@ -447,7 +485,7 @@ The image files are provided by JRWR'S I/O PORT and are built once a Sunday at m
 * [Debian CrossToolchains Wiki](https://wiki.debian.org/CrossToolchains)
 * [Official Raspberry Pi Firmware on github](https://github.com/raspberrypi/firmware)
 * [Official Raspberry Pi Kernel on github](https://github.com/raspberrypi/linux)
-* [U-BOOT git repository](http://git.denx.de/?p=u-boot.git;a=summary)
+* [U-BOOT git repository](https://git.denx.de/?p=u-boot.git;a=summary)
 * [Xorg DDX driver fbturbo](https://github.com/ssvb/xf86-video-fbturbo)
 * [RPi3 Wireless interface firmware](https://github.com/RPi-Distro/firmware-nonfree/tree/master/brcm80211/brcm)
 * [Collabora RPi2 Kernel precompiled](https://repositories.collabora.co.uk/debian/)

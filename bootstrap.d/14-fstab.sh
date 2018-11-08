@@ -20,7 +20,7 @@ if [ "$ENABLE_CRYPTFS" = true ] ; then
 
   # Add encrypted partition to crypttab and fstab
   install_readonly files/mount/crypttab "${ETC_DIR}/crypttab"
-  echo "${CRYPTFS_MAPPING} /dev/mmcblk0p2 none luks" >> "${ETC_DIR}/crypttab"
+  echo "${CRYPTFS_MAPPING} /dev/mmcblk0p2 none luks,initramfs" >> "${ETC_DIR}/crypttab"
 
   if [ "$ENABLE_SPLITFS" = true ] ; then
     # Add usb/sda disk to crypttab
@@ -40,6 +40,9 @@ if [ "$BUILD_KERNEL" = true ] && [ "$ENABLE_INITRAMFS" = true ] ; then
 
     # Disable SSHD inside initramfs
     printf "#\n# DROPBEAR: [ y | n ]\n#\n\nDROPBEAR=n\n" >> "${ETC_DIR}/initramfs-tools/initramfs.conf"
+
+    # Add cryptsetup modules to initramfs
+    printf "#\n# CRYPTSETUP: [ y | n ]\n#\n\nCRYPTSETUP=y\n" >> "${ETC_DIR}/initramfs-tools/conf-hook"
 
     # Dummy mapping required by mkinitramfs
     echo "0 1 crypt $(echo ${CRYPTFS_CIPHER} | cut -d ':' -f 1) ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 0 7:0 4096" | chroot_exec dmsetup create "${CRYPTFS_MAPPING}"

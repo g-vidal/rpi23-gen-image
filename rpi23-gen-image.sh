@@ -42,10 +42,30 @@ set -x
 
 # Raspberry Pi model configuration
 RPI_MODEL=${RPI_MODEL:=2}
+
+#bcm2708-rpi-0-w.dtb (Used for Pi 0 and PI 0W)
+RPI0_DTB_FILE=${RPI0_DTB_FILE:=bcm2708-rpi-0-w.dtb}
+RPI0_UBOOT_CONFIG=${RPI0_UBOOT_CONFIG:=rpi_defconfig}
+
+#bcm2708-rpi-b.dtb (Used for Pi 1 model A and B)
+RPI1_DTB_FILE=${RPI1_DTB_FILE:=bcm2708-rpi-b.dtb}
+RPI1_UBOOT_CONFIG=${RPI1_UBOOT_CONFIG:=rpi_defconfig}
+
+#bcm2708-rpi-b-plus.dtb (Used for Pi 1 model B+ and A+)
+RPI1P_DTB_FILE=${RPI1P_DTB_FILE:=bcm2708-rpi-b-plus.dtb}
+RPI1P_UBOOT_CONFIG=${RPI1P_UBOOT_CONFIG:=rpi_defconfig}
+
+#bcm2709-rpi-2-b.dtb (Used for Pi 2 model B)
 RPI2_DTB_FILE=${RPI2_DTB_FILE:=bcm2709-rpi-2-b.dtb}
 RPI2_UBOOT_CONFIG=${RPI2_UBOOT_CONFIG:=rpi_2_defconfig}
+
+#bcm2710-rpi-3-b.dtb (Used for Pi 3 model B)
 RPI3_DTB_FILE=${RPI3_DTB_FILE:=bcm2710-rpi-3-b.dtb}
 RPI3_UBOOT_CONFIG=${RPI3_UBOOT_CONFIG:=rpi_3_32b_defconfig}
+
+#bcm2710-rpi-3-b-plus.dtb (Used for Pi 3 model B+)
+RPI3P_DTB_FILE=${RPI3P_DTB_FILE:=bcm2710-rpi-3-b-plus.dtb}
+RPI3P_UBOOT_CONFIG=${RPI3P_UBOOT_CONFIG:=rpi_3_32b_defconfig}
 
 # Debian release
 RELEASE=${RELEASE:=jessie}
@@ -56,10 +76,19 @@ COLLABORA_KERNEL=${COLLABORA_KERNEL:=3.18.0-trunk-rpi2}
 if [ "$KERNEL_ARCH" = "arm64" ] ; then
   KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcmrpi3_defconfig}
   KERNEL_IMAGE=${KERNEL_IMAGE:=kernel8.img}
+fi
+
+if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 1 ] || [ "$RPI_MODEL" = 1P ] ; then
+#RASPBERRY PI 1, PI ZERO, PI ZERO W, AND COMPUTE MODULE DEFAULT Kernel BUILD CONFIGURATION
+  KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcmrpi_defconfig}
+  KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
 else
+#RASPBERRY PI 2, PI 3, PI 3+, AND COMPUTE MODULE 3 DEFAULT Kernel BUILD CONFIGURATION
+#https://www.raspberrypi.org/documentation/linux/kernel/building.md
   KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcm2709_defconfig}
   KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
 fi
+
 if [ "$RELEASE_ARCH" = "arm64" ] ; then
   QEMU_BINARY=${QEMU_BINARY:=/usr/bin/qemu-aarch64-static}
 else
@@ -73,7 +102,7 @@ FIRMWARE_URL=${FIRMWARE_URL:=https://github.com/raspberrypi/firmware/raw/master/
 WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm}
 COLLABORA_URL=${COLLABORA_URL:=https://repositories.collabora.co.uk/debian}
 FBTURBO_URL=${FBTURBO_URL:=https://github.com/ssvb/xf86-video-fbturbo.git}
-UBOOT_URL=${UBOOT_URL:=git://git.denx.de/u-boot.git}
+UBOOT_URL=${UBOOT_URL:=https://git.denx.de/u-boot.git}
 
 # Build directories
 BASEDIR=${BASEDIR:=$(pwd)/images/${RELEASE}}
@@ -146,6 +175,7 @@ ENABLE_RSYSLOG=${ENABLE_RSYSLOG:=true}
 ENABLE_USER=${ENABLE_USER:=true}
 USER_NAME=${USER_NAME:="pi"}
 ENABLE_ROOT=${ENABLE_ROOT:=false}
+ENABLE_QEMU=${ENABLE_QEMU:=false}
 
 # SSH settings
 SSH_ENABLE_ROOT=${SSH_ENABLE_ROOT:=false}
@@ -175,6 +205,9 @@ KERNEL_THREADS=${KERNEL_THREADS:=1}
 KERNEL_HEADERS=${KERNEL_HEADERS:=true}
 KERNEL_MENUCONFIG=${KERNEL_MENUCONFIG:=false}
 KERNEL_REMOVESRC=${KERNEL_REMOVESRC:=true}
+KERNEL_OLDDEFCONFIG=${KERNEL_OLDDEFCONFIG:=false}
+KERNEL_CCACHE=${KERNEL_CCACHE:=false}
+
 if [ "$KERNEL_ARCH" = "arm64" ] ; then
   KERNEL_BIN_IMAGE=${KERNEL_BIN_IMAGE:="Image"}
 else
@@ -204,9 +237,6 @@ CRYPTFS_MAPPING=${CRYPTFS_MAPPING:="secure"}
 CRYPTFS_CIPHER=${CRYPTFS_CIPHER:="aes-xts-plain64:sha512"}
 CRYPTFS_XTSKEYSIZE=${CRYPTFS_XTSKEYSIZE:=512}
 
-# Stop the Crypto Wars
-DISABLE_FBI=${DISABLE_FBI:=false}
-
 # Chroot scripts directory
 CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
@@ -224,23 +254,35 @@ COMPILER_PACKAGES=""
 set +x
 
 # Set Raspberry Pi model specific configuration
-if [ "$RPI_MODEL" = 2 ] ; then
+if [ "$RPI_MODEL" = 0 ] ; then
+  DTB_FILE=${RPI0_DTB_FILE}
+  UBOOT_CONFIG=${RPI0_UBOOT_CONFIG}
+elif [ "$RPI_MODEL" = 1 ] ; then
+  DTB_FILE=${RPI1_DTB_FILE}
+  UBOOT_CONFIG=${RPI1_UBOOT_CONFIG}
+elif [ "$RPI_MODEL" = 1P ] ; then
+  DTB_FILE=${RPI1P_DTB_FILE}
+  UBOOT_CONFIG=${RPI1P_UBOOT_CONFIG}
+elif [ "$RPI_MODEL" = 2 ] ; then
   DTB_FILE=${RPI2_DTB_FILE}
   UBOOT_CONFIG=${RPI2_UBOOT_CONFIG}
 elif [ "$RPI_MODEL" = 3 ] ; then
   DTB_FILE=${RPI3_DTB_FILE}
   UBOOT_CONFIG=${RPI3_UBOOT_CONFIG}
-  BUILD_KERNEL=true
+elif [ "$RPI_MODEL" = 3P ] ; then
+  DTB_FILE=${RPI3P_DTB_FILE}
+  UBOOT_CONFIG=${RPI3P_UBOOT_CONFIG}
 else
   echo "error: Raspberry Pi model ${RPI_MODEL} is not supported!"
   exit 1
 fi
 
 # Check if the internal wireless interface is supported by the RPi model
-if [ "$ENABLE_WIRELESS" = true ] && [ "$RPI_MODEL" != 3 ] ; then
+if [ "$ENABLE_WIRELESS" = true ] && ([ "$RPI_MODEL" = 1 ] || [ "$RPI_MODEL" = 1P ] || [ "$RPI_MODEL" = 2 ]); then
+
   echo "error: The selected Raspberry Pi model has no internal wireless interface"
   exit 1
-fi
+fi  
 
 # Check if DISABLE_UNDERVOLT_WARNINGS parameter value is supported
 if [ ! -z "$DISABLE_UNDERVOLT_WARNINGS" ] ; then
@@ -258,9 +300,15 @@ fi
 # Add packages required for kernel cross compilation
 if [ "$BUILD_KERNEL" = true ] ; then
   if [ "$KERNEL_ARCH" = "arm" ] ; then
-    REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
-  else
-    REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-arm64"
+    if [ "$RELEASE_ARCH" = "armel" ]; then
+      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armel"
+    fi
+    if [ "$RELEASE_ARCH" = "armhf" ]; then
+      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
+    fi
+    if [ "$RELEASE_ARCH" = "arm64" ]; then
+      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-arm64"
+    fi
   fi
 fi
 
@@ -269,15 +317,15 @@ if [ "$KERNEL_MENUCONFIG" = true ] ; then
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libncurses5-dev"
 fi
 
-# Stop the Crypto Wars
-if [ "$DISABLE_FBI" = true ] ; then
-  ENABLE_CRYPTFS=true
+# Add ccache compiler cache for (faster) kernel cross (re)compilation
+if [ "$KERNEL_CCACHE" = true ] ; then
+  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} ccache"
 fi
 
 # Add cryptsetup package to enable filesystem encryption
 if [ "$ENABLE_CRYPTFS" = true ]  && [ "$BUILD_KERNEL" = true ] ; then
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} cryptsetup"
-  APT_INCLUDES="${APT_INCLUDES},cryptsetup"
+  APT_INCLUDES="${APT_INCLUDES},cryptsetup,busybox,console-setup"
 
   if [ -z "$CRYPTFS_PASSWORD" ] ; then
     echo "error: no password defined (CRYPTFS_PASSWORD)!"
@@ -293,7 +341,7 @@ fi
 
 # Add device-tree-compiler required for building the U-Boot bootloader
 if [ "$ENABLE_UBOOT" = true ] ; then
-  APT_INCLUDES="${APT_INCLUDES},device-tree-compiler"
+  APT_INCLUDES="${APT_INCLUDES},device-tree-compiler,bison,flex"
 fi
 
 # Check if root SSH (v2) public key file exists
@@ -480,6 +528,16 @@ if [ "$KERNEL_REDUCE" = true ] ; then
   KERNELSRC_CONFIG=false
 fi
 
+# Configure qemu compatible kernel
+if [ "$ENABLE_QEMU" = true ] ; then
+  DTB_FILE=vexpress-v2p-ca15_a7.dtb
+  UBOOT_CONFIG=vexpress_ca15_tc2_defconfig
+  KERNEL_DEFCONFIG="vexpress_defconfig"
+  if [ "$KERNEL_MENUCONFIG" = false ] ; then
+    KERNEL_OLDDEFCONFIG=true
+  fi
+fi
+
 # Execute bootstrap scripts
 for SCRIPT in bootstrap.d/*.sh; do
   head -n 3 "$SCRIPT"
@@ -545,6 +603,54 @@ rm -f "${R}/var/lib/urandom/random-seed"
 rm -f "${R}/initrd.img"
 rm -f "${R}/vmlinuz"
 rm -f "${R}${QEMU_BINARY}"
+
+if [ "$ENABLE_QEMU" = true ] ; then
+  # Setup QEMU directory
+  mkdir "${BASEDIR}/qemu"
+
+  # Copy kernel image to QEMU directory
+  install_readonly "${BOOT_DIR}/${KERNEL_IMAGE}" "${BASEDIR}/qemu/${KERNEL_IMAGE}"
+
+  # Copy kernel config to QEMU directory
+  install_readonly "${R}/boot/config-${KERNEL_VERSION}" "${BASEDIR}/qemu/config-${KERNEL_VERSION}"
+
+  # Copy kernel dtbs to QEMU directory
+  for dtb in "${BOOT_DIR}/"*.dtb ; do
+    if [ -f "${dtb}" ] ; then
+      install_readonly "${dtb}" "${BASEDIR}/qemu/"
+    fi
+  done
+
+  # Copy kernel overlays to QEMU directory
+  if [ -d "${BOOT_DIR}/overlays" ] ; then
+    # Setup overlays dtbs directory
+    mkdir "${BASEDIR}/qemu/overlays"
+
+    for dtb in "${BOOT_DIR}/overlays/"*.dtb ; do
+      if [ -f "${dtb}" ] ; then
+        install_readonly "${dtb}" "${BASEDIR}/qemu/overlays/"
+      fi
+    done
+  fi
+
+  # Copy u-boot files to QEMU directory
+  if [ "$ENABLE_UBOOT" = true ] ; then
+    if [ -f "${BOOT_DIR}/u-boot.bin" ] ; then
+      install_readonly "${BOOT_DIR}/u-boot.bin" "${BASEDIR}/qemu/u-boot.bin"
+    fi
+    if [ -f "${BOOT_DIR}/uboot.mkimage" ] ; then
+      install_readonly "${BOOT_DIR}/uboot.mkimage" "${BASEDIR}/qemu/uboot.mkimage"
+    fi
+    if [ -f "${BOOT_DIR}/boot.scr" ] ; then
+      install_readonly "${BOOT_DIR}/boot.scr" "${BASEDIR}/qemu/boot.scr"
+    fi
+  fi
+
+  # Copy initramfs to QEMU directory
+  if [ -f "${BOOT_DIR}/initramfs-${KERNEL_VERSION}" ] ; then
+    install_readonly "${BOOT_DIR}/initramfs-${KERNEL_VERSION}" "${BASEDIR}/qemu/initramfs-${KERNEL_VERSION}"
+  fi
+fi
 
 # Calculate size of the chroot directory in KB
 CHROOT_SIZE=$(expr `du -s "${R}" | awk '{ print $1 }'`)
@@ -654,4 +760,15 @@ else
 
   # Image was successfully created
   echo "$IMAGE_NAME.img ($(expr \( ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS} \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
+
+  # Create qemu qcow2 image
+  if [ "$ENABLE_QEMU" = true ] ; then
+    QEMU_IMAGE=${QEMU_IMAGE:=${BASEDIR}/qemu/${DATE}-${KERNEL_ARCH}-CURRENT-rpi${RPI_MODEL}-${RELEASE}-${RELEASE_ARCH}}
+    QEMU_SIZE=16G
+
+    qemu-img convert -f raw -O qcow2 $IMAGE_NAME.img $QEMU_IMAGE.qcow2
+    qemu-img resize $QEMU_IMAGE.qcow2 $QEMU_SIZE
+
+    echo "$QEMU_IMAGE.qcow2 ($QEMU_SIZE)" ": successfully created"
+  fi
 fi
