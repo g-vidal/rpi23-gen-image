@@ -1,9 +1,8 @@
 #!/bin/sh
-
 ########################################################################
 # rpi23-gen-image.sh					       2015-2017
 #
-# Advanced Debian "jessie", "stretch" and "buster" bootstrap script for RPi2/3
+# Advanced Debian "stretch" and "buster" bootstrap script for Raspberry Pi
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -31,69 +30,22 @@ fi
 . ./functions.sh
 
 # Load parameters from configuration template file
-if [ ! -z "$CONFIG_TEMPLATE" ] ; then
+if [ -n "$CONFIG_TEMPLATE" ] ; then
   use_template
 fi
 
 # Introduce settings
 set -e
-echo -n -e "\n#\n# RPi2/3 Bootstrap Settings\n#\n"
+echo -n -e "\n#\n# RPi 0/1/2/3 Bootstrap Settings\n#\n"
 set -x
 
 # Raspberry Pi model configuration
 RPI_MODEL=${RPI_MODEL:=2}
 
-#bcm2708-rpi-0-w.dtb (Used for Pi 0 and PI 0W)
-RPI0_DTB_FILE=${RPI0_DTB_FILE:=bcm2708-rpi-0-w.dtb}
-RPI0_UBOOT_CONFIG=${RPI0_UBOOT_CONFIG:=rpi_defconfig}
-
-#bcm2708-rpi-b.dtb (Used for Pi 1 model A and B)
-RPI1_DTB_FILE=${RPI1_DTB_FILE:=bcm2708-rpi-b.dtb}
-RPI1_UBOOT_CONFIG=${RPI1_UBOOT_CONFIG:=rpi_defconfig}
-
-#bcm2708-rpi-b-plus.dtb (Used for Pi 1 model B+ and A+)
-RPI1P_DTB_FILE=${RPI1P_DTB_FILE:=bcm2708-rpi-b-plus.dtb}
-RPI1P_UBOOT_CONFIG=${RPI1P_UBOOT_CONFIG:=rpi_defconfig}
-
-#bcm2709-rpi-2-b.dtb (Used for Pi 2 model B)
-RPI2_DTB_FILE=${RPI2_DTB_FILE:=bcm2709-rpi-2-b.dtb}
-RPI2_UBOOT_CONFIG=${RPI2_UBOOT_CONFIG:=rpi_2_defconfig}
-
-#bcm2710-rpi-3-b.dtb (Used for Pi 3 model B)
-RPI3_DTB_FILE=${RPI3_DTB_FILE:=bcm2710-rpi-3-b.dtb}
-RPI3_UBOOT_CONFIG=${RPI3_UBOOT_CONFIG:=rpi_3_32b_defconfig}
-
-#bcm2710-rpi-3-b-plus.dtb (Used for Pi 3 model B+)
-RPI3P_DTB_FILE=${RPI3P_DTB_FILE:=bcm2710-rpi-3-b-plus.dtb}
-RPI3P_UBOOT_CONFIG=${RPI3P_UBOOT_CONFIG:=rpi_3_32b_defconfig}
-
 # Debian release
-RELEASE=${RELEASE:=jessie}
-KERNEL_ARCH=${KERNEL_ARCH:=arm}
-RELEASE_ARCH=${RELEASE_ARCH:=armhf}
-CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabihf-}
-COLLABORA_KERNEL=${COLLABORA_KERNEL:=3.18.0-trunk-rpi2}
-if [ "$KERNEL_ARCH" = "arm64" ] ; then
-  KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcmrpi3_defconfig}
-  KERNEL_IMAGE=${KERNEL_IMAGE:=kernel8.img}
-fi
+RELEASE=${RELEASE:=buster}
 
-if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 1 ] || [ "$RPI_MODEL" = 1P ] ; then
-#RASPBERRY PI 1, PI ZERO, PI ZERO W, AND COMPUTE MODULE DEFAULT Kernel BUILD CONFIGURATION
-  KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcmrpi_defconfig}
-  KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
-else
-#RASPBERRY PI 2, PI 3, PI 3+, AND COMPUTE MODULE 3 DEFAULT Kernel BUILD CONFIGURATION
-#https://www.raspberrypi.org/documentation/linux/kernel/building.md
-  KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcm2709_defconfig}
-  KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
-fi
-
-if [ "$RELEASE_ARCH" = "arm64" ] ; then
-  QEMU_BINARY=${QEMU_BINARY:=/usr/bin/qemu-aarch64-static}
-else
-  QEMU_BINARY=${QEMU_BINARY:=/usr/bin/qemu-arm-static}
-fi
+# Kernel Branch
 KERNEL_BRANCH=${KERNEL_BRANCH:=""}
 
 # URLs
@@ -103,18 +55,13 @@ WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-no
 COLLABORA_URL=${COLLABORA_URL:=https://repositories.collabora.co.uk/debian}
 FBTURBO_URL=${FBTURBO_URL:=https://github.com/ssvb/xf86-video-fbturbo.git}
 UBOOT_URL=${UBOOT_URL:=https://git.denx.de/u-boot.git}
+VIDEOCORE_URL=${VIDEOCORE_URL:=https://github.com/raspberrypi/userland}
+BLUETOOTH_URL=${BLUETOOTH_URL:=https://github.com/RPi-Distro/pi-bluetooth.git}
 
 # Build directories
-BASEDIR=${BASEDIR:=$(pwd)/images/${RELEASE}}
+WORKDIR=$(pwd)
+BASEDIR=${BASEDIR:=${WORKDIR}/images/${RELEASE}}
 BUILDDIR="${BASEDIR}/build"
-
-# Prepare date string for default image file name
-DATE="$(date +%Y-%m-%d)"
-if [ -z "$KERNEL_BRANCH" ] ; then
-  IMAGE_NAME=${IMAGE_NAME:=${BASEDIR}/${DATE}-${KERNEL_ARCH}-CURRENT-rpi${RPI_MODEL}-${RELEASE}-${RELEASE_ARCH}}
-else
-  IMAGE_NAME=${IMAGE_NAME:=${BASEDIR}/${DATE}-${KERNEL_ARCH}-${KERNEL_BRANCH}-rpi${RPI_MODEL}-${RELEASE}-${RELEASE_ARCH}}
-fi
 
 # Chroot directories
 R="${BUILDDIR}/chroot"
@@ -122,12 +69,14 @@ ETC_DIR="${R}/etc"
 LIB_DIR="${R}/lib"
 BOOT_DIR="${R}/boot/firmware"
 KERNEL_DIR="${R}/usr/src/linux"
-WLAN_FIRMWARE_DIR="${R}/lib/firmware/brcm"
+WLAN_FIRMWARE_DIR="${LIB_DIR}/firmware/brcm"
+BLUETOOTH_FIRMWARE_DIR="${ETC_DIR}/firmware/bt"
 
 # Firmware directory: Blank if download from github
 RPI_FIRMWARE_DIR=${RPI_FIRMWARE_DIR:=""}
 
 # General settings
+SET_ARCH=${SET_ARCH:=32}
 HOSTNAME=${HOSTNAME:=rpi${RPI_MODEL}-${RELEASE}}
 PASSWORD=${PASSWORD:=raspberry}
 USER_PASSWORD=${USER_PASSWORD:=raspberry}
@@ -158,6 +107,9 @@ APT_PROXY=${APT_PROXY:=""}
 APT_SERVER=${APT_SERVER:="ftp.debian.org"}
 
 # Feature settings
+ENABLE_PRINTK=${ENABLE_PRINTK:=false}
+ENABLE_BLUETOOTH=${ENABLE_BLUETOOTH:=false}
+ENABLE_MINIUART_OVERLAY=${ENABLE_MINIUART_OVERLAY:=false}
 ENABLE_CONSOLE=${ENABLE_CONSOLE:=true}
 ENABLE_I2C=${ENABLE_I2C:=false}
 ENABLE_SPI=${ENABLE_SPI:=false}
@@ -176,6 +128,7 @@ ENABLE_USER=${ENABLE_USER:=true}
 USER_NAME=${USER_NAME:="pi"}
 ENABLE_ROOT=${ENABLE_ROOT:=false}
 ENABLE_QEMU=${ENABLE_QEMU:=false}
+ENABLE_SYSVINIT=${ENABLE_SYSVINIT:=false}
 
 # SSH settings
 SSH_ENABLE_ROOT=${SSH_ENABLE_ROOT:=false}
@@ -190,6 +143,8 @@ ENABLE_REDUCE=${ENABLE_REDUCE:=false}
 ENABLE_UBOOT=${ENABLE_UBOOT:=false}
 UBOOTSRC_DIR=${UBOOTSRC_DIR:=""}
 ENABLE_FBTURBO=${ENABLE_FBTURBO:=false}
+ENABLE_VIDEOCORE=${ENABLE_VIDEOCORE:=false}
+VIDEOCORESRC_DIR=${VIDEOCORESRC_DIR:=""}
 FBTURBOSRC_DIR=${FBTURBOSRC_DIR:=""}
 ENABLE_HARDNET=${ENABLE_HARDNET:=false}
 ENABLE_IPTABLES=${ENABLE_IPTABLES:=false}
@@ -199,7 +154,7 @@ ENABLE_IFNAMES=${ENABLE_IFNAMES:=true}
 DISABLE_UNDERVOLT_WARNINGS=${DISABLE_UNDERVOLT_WARNINGS:=}
 
 # Kernel compilation settings
-BUILD_KERNEL=${BUILD_KERNEL:=false}
+BUILD_KERNEL=${BUILD_KERNEL:=true}
 KERNEL_REDUCE=${KERNEL_REDUCE:=false}
 KERNEL_THREADS=${KERNEL_THREADS:=1}
 KERNEL_HEADERS=${KERNEL_HEADERS:=true}
@@ -207,12 +162,6 @@ KERNEL_MENUCONFIG=${KERNEL_MENUCONFIG:=false}
 KERNEL_REMOVESRC=${KERNEL_REMOVESRC:=true}
 KERNEL_OLDDEFCONFIG=${KERNEL_OLDDEFCONFIG:=false}
 KERNEL_CCACHE=${KERNEL_CCACHE:=false}
-
-if [ "$KERNEL_ARCH" = "arm64" ] ; then
-  KERNEL_BIN_IMAGE=${KERNEL_BIN_IMAGE:="Image"}
-else
-  KERNEL_BIN_IMAGE=${KERNEL_BIN_IMAGE:="zImage"}
-fi
 
 # Kernel compilation from source directory settings
 KERNELSRC_DIR=${KERNELSRC_DIR:=""}
@@ -242,7 +191,10 @@ CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
 # Packages required in the chroot build environment
 APT_INCLUDES=${APT_INCLUDES:=""}
-APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils"
+APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils,locales,keyboard-configuration,console-setup,libnss-systemd"
+
+# Packages to exclude from chroot build environment
+APT_EXCLUDES=${APT_EXCLUDES:=""}
 
 # Packages required for bootstrapping
 REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus sudo"
@@ -253,68 +205,134 @@ COMPILER_PACKAGES=""
 
 set +x
 
-# Set Raspberry Pi model specific configuration
-if [ "$RPI_MODEL" = 0 ] ; then
-  DTB_FILE=${RPI0_DTB_FILE}
-  UBOOT_CONFIG=${RPI0_UBOOT_CONFIG}
-elif [ "$RPI_MODEL" = 1 ] ; then
-  DTB_FILE=${RPI1_DTB_FILE}
-  UBOOT_CONFIG=${RPI1_UBOOT_CONFIG}
-elif [ "$RPI_MODEL" = 1P ] ; then
-  DTB_FILE=${RPI1P_DTB_FILE}
-  UBOOT_CONFIG=${RPI1P_UBOOT_CONFIG}
-elif [ "$RPI_MODEL" = 2 ] ; then
-  DTB_FILE=${RPI2_DTB_FILE}
-  UBOOT_CONFIG=${RPI2_UBOOT_CONFIG}
-elif [ "$RPI_MODEL" = 3 ] ; then
-  DTB_FILE=${RPI3_DTB_FILE}
-  UBOOT_CONFIG=${RPI3_UBOOT_CONFIG}
-elif [ "$RPI_MODEL" = 3P ] ; then
-  DTB_FILE=${RPI3P_DTB_FILE}
-  UBOOT_CONFIG=${RPI3P_UBOOT_CONFIG}
-else
-  echo "error: Raspberry Pi model ${RPI_MODEL} is not supported!"
-  exit 1
+#Check if apt-cacher-ng has port 3142 open and set APT_PROXY
+APT_CACHER_RUNNING=$(lsof -i :3142 | grep apt-cacher-ng |  cut -d ' ' -f3 | uniq)
+if [ -n "${APT_CACHER_RUNNING}" ] ; then
+  APT_PROXY=http://127.0.0.1:3142/
 fi
 
-# Check if the internal wireless interface is supported by the RPi model
-if [ "$ENABLE_WIRELESS" = true ] && ([ "$RPI_MODEL" = 1 ] || [ "$RPI_MODEL" = 1P ] || [ "$RPI_MODEL" = 2 ]); then
+# Setup architecture specific settings
+if [ -n "$SET_ARCH" ] ; then
+  # 64-bit configuration
+  if [ "$SET_ARCH" = 64 ] ; then
+    # General 64-bit depended settings
+    QEMU_BINARY=${QEMU_BINARY:=/usr/bin/qemu-aarch64-static}
+    KERNEL_ARCH=${KERNEL_ARCH:=arm64}
+    KERNEL_BIN_IMAGE=${KERNEL_BIN_IMAGE:="Image"}
 
-  echo "error: The selected Raspberry Pi model has no internal wireless interface"
+    # Raspberry Pi model specific settings
+    if [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] ; then
+      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-arm64"
+      KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcmrpi3_defconfig}
+      RELEASE_ARCH=${RELEASE_ARCH:=arm64}
+      KERNEL_IMAGE=${KERNEL_IMAGE:=kernel8.img}
+      CROSS_COMPILE=${CROSS_COMPILE:=aarch64-linux-gnu-}
+    else
+      echo "error: Only Raspberry PI 3 and 3B+ support 64-bit"
+      exit 1
+    fi
+  fi
+
+  # 32-bit configuration
+  if [ "$SET_ARCH" = 32 ] ; then
+    # General 32-bit dependend settings
+    QEMU_BINARY=${QEMU_BINARY:=/usr/bin/qemu-arm-static}
+    KERNEL_ARCH=${KERNEL_ARCH:=arm}
+    KERNEL_BIN_IMAGE=${KERNEL_BIN_IMAGE:="zImage"}
+
+    # Raspberry Pi model specific settings
+    if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 1 ] || [ "$RPI_MODEL" = 1P ] ; then
+      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armel"
+      KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcmrpi_defconfig}
+      RELEASE_ARCH=${RELEASE_ARCH:=armel}
+      KERNEL_IMAGE=${KERNEL_IMAGE:=kernel.img}
+      CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabi-}
+    fi
+
+    # Raspberry Pi model specific settings
+    if [ "$RPI_MODEL" = 2 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] ; then
+      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
+      KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcm2709_defconfig}
+      RELEASE_ARCH=${RELEASE_ARCH:=armhf}
+      KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
+      CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabihf-}
+    fi
+  fi
+#SET_ARCH not set
+else
+  echo "error: Please set '32' or '64' as value for SET_ARCH"
   exit 1
-fi  
+fi
+# Device specific configuration and U-Boot configuration
+case "$RPI_MODEL" in
+  0)
+    DTB_FILE=${DTB_FILE:=bcm2708-rpi-0-w.dtb}
+    UBOOT_CONFIG=${UBOOT_CONFIG:=rpi_defconfig}
+    ;;
+  1)
+    DTB_FILE=${DTB_FILE:=bcm2708-rpi-b.dtb}
+    UBOOT_CONFIG=${UBOOT_CONFIG:=rpi_defconfig}
+    ;;
+  1P)
+    DTB_FILE=${DTB_FILE:=bcm2708-rpi-b-plus.dtb}
+    UBOOT_CONFIG=${UBOOT_CONFIG:=rpi_defconfig}
+    ;;
+  2)
+    DTB_FILE=${DTB_FILE:=bcm2709-rpi-2-b.dtb}
+    UBOOT_CONFIG=${UBOOT_CONFIG:=rpi_2_defconfig}
+    ;;
+  3)
+    DTB_FILE=${DTB_FILE:=bcm2710-rpi-3-b.dtb}
+    UBOOT_CONFIG=${UBOOT_CONFIG:=rpi_3_defconfig}
+    ;;
+  3P)
+    DTB_FILE=${DTB_FILE:=bcm2710-rpi-3-b.dtb}
+    UBOOT_CONFIG=${UBOOT_CONFIG:=rpi_3_defconfig}
+    ;;
+  *)
+    echo "error: Raspberry Pi model $RPI_MODEL is not supported!"
+    exit 1
+    ;;
+esac
+
+# Raspberry PI 0,3,3P with Bluetooth and Wifi onboard
+if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] ; then
+  # Include bluetooth packages on supported boards
+  if [ "$ENABLE_BLUETOOTH" = true ] && [ "$ENABLE_CONSOLE" = false ]; then
+    APT_INCLUDES="${APT_INCLUDES},bluetooth,bluez"
+  fi
+else # Raspberry PI 1,1P,2 without Wifi and bluetooth onboard
+  # Check if the internal wireless interface is not supported by the RPi model
+  if [ "$ENABLE_WIRELESS" = true ] || [ "$ENABLE_BLUETOOTH" = true ]; then
+    echo "error: The selected Raspberry Pi model has no integrated interface for wireless or bluetooth"
+    exit 1
+  fi
+fi
+
+# Prepare date string for default image file name
+DATE="$(date +%Y-%m-%d)"
+if [ -z "$KERNEL_BRANCH" ] ; then
+  IMAGE_NAME=${IMAGE_NAME:=${BASEDIR}/${DATE}-${KERNEL_ARCH}-CURRENT-rpi${RPI_MODEL}-${RELEASE}-${RELEASE_ARCH}}
+else
+  IMAGE_NAME=${IMAGE_NAME:=${BASEDIR}/${DATE}-${KERNEL_ARCH}-${KERNEL_BRANCH}-rpi${RPI_MODEL}-${RELEASE}-${RELEASE_ARCH}}
+fi
 
 # Check if DISABLE_UNDERVOLT_WARNINGS parameter value is supported
-if [ ! -z "$DISABLE_UNDERVOLT_WARNINGS" ] ; then
+if [ -n "$DISABLE_UNDERVOLT_WARNINGS" ] ; then
   if [ "$DISABLE_UNDERVOLT_WARNINGS" != 1 ] && [ "$DISABLE_UNDERVOLT_WARNINGS" != 2 ] ; then
     echo "error: DISABLE_UNDERVOLT_WARNINGS=${DISABLE_UNDERVOLT_WARNINGS} is not supported"
     exit 1
   fi
 fi
 
-# Build RPi2/3 Linux kernel if required by Debian release
-if [ "$RELEASE" = "stretch" ]  || [ "$RELEASE" = "buster" ] ; then
-  BUILD_KERNEL=true
-fi
-
-# Add packages required for kernel cross compilation
-if [ "$BUILD_KERNEL" = true ] ; then
-  if [ "$KERNEL_ARCH" = "arm" ] ; then
-    if [ "$RELEASE_ARCH" = "armel" ]; then
-      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armel"
-    fi
-    if [ "$RELEASE_ARCH" = "armhf" ]; then
-      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
-    fi
-    if [ "$RELEASE_ARCH" = "arm64" ]; then
-      REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-arm64"
-    fi
-  fi
+# Add cmake to compile videocore sources
+if [ "$ENABLE_VIDEOCORE" = true ] ; then
+  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} cmake"
 fi
 
 # Add libncurses5 to enable kernel menuconfig
 if [ "$KERNEL_MENUCONFIG" = true ] ; then
-  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libncurses5-dev"
+  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libncurses-dev"
 fi
 
 # Add ccache compiler cache for (faster) kernel cross (re)compilation
@@ -341,11 +359,19 @@ fi
 
 # Add device-tree-compiler required for building the U-Boot bootloader
 if [ "$ENABLE_UBOOT" = true ] ; then
-  APT_INCLUDES="${APT_INCLUDES},device-tree-compiler,bison,flex"
+  APT_INCLUDES="${APT_INCLUDES},device-tree-compiler,bison,flex,bc"
+fi
+
+if [ "$ENABLE_BLUETOOTH" = true ] ; then
+  if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] ; then
+    if [ "$ENABLE_CONSOLE" = false ] ; then
+	  APT_INCLUDES="${APT_INCLUDES},bluetooth,bluez"
+	fi
+  fi
 fi
 
 # Check if root SSH (v2) public key file exists
-if [ ! -z "$SSH_ROOT_PUB_KEY" ] ; then
+if [ -n "$SSH_ROOT_PUB_KEY" ] ; then
   if [ ! -f "$SSH_ROOT_PUB_KEY" ] ; then
     echo "error: '$SSH_ROOT_PUB_KEY' specified SSH public key file not found (SSH_ROOT_PUB_KEY)!"
     exit 1
@@ -353,7 +379,7 @@ if [ ! -z "$SSH_ROOT_PUB_KEY" ] ; then
 fi
 
 # Check if $USER_NAME SSH (v2) public key file exists
-if [ ! -z "$SSH_USER_PUB_KEY" ] ; then
+if [ -n "$SSH_USER_PUB_KEY" ] ; then
   if [ ! -f "$SSH_USER_PUB_KEY" ] ; then
     echo "error: '$SSH_USER_PUB_KEY' specified SSH public key file not found (SSH_USER_PUB_KEY)!"
     exit 1
@@ -362,7 +388,7 @@ fi
 
 # Check if all required packages are installed on the build system
 for package in $REQUIRED_PACKAGES ; do
-  if [ "`dpkg-query -W -f='${Status}' $package`" != "install ok installed" ] ; then
+  if [ "$(dpkg-query -W -f='${Status}' "$package")" != "install ok installed" ] ; then
     MISSING_PACKAGES="${MISSING_PACKAGES} $package"
   fi
 done
@@ -372,12 +398,12 @@ if [ -n "$MISSING_PACKAGES" ] ; then
   echo "the following packages needed by this script are not installed:"
   echo "$MISSING_PACKAGES"
 
-  echo -n "\ndo you want to install the missing packages right now? [y/n] "
-  read confirm
+  printf "\ndo you want to install the missing packages right now? [y/n] "
+  read -r confirm
   [ "$confirm" != "y" ] && exit 1
 
   # Make sure all missing required packages are installed
-  apt-get -qq -y install ${MISSING_PACKAGES}
+  apt-get -qq -y install `echo "${MISSING_PACKAGES}" | sed "s/ //"`
 fi
 
 # Check if ./bootstrap.d directory exists
@@ -401,6 +427,12 @@ fi
 # Check if specified UBOOTSRC_DIR directory exists
 if [ -n "$UBOOTSRC_DIR" ] && [ ! -d "$UBOOTSRC_DIR" ] ; then
   echo "error: '${UBOOTSRC_DIR}' specified directory not found (UBOOTSRC_DIR)!"
+  exit 1
+fi
+
+# Check if specified VIDEOCORESRC_DIR directory exists
+if [ -n "$VIDEOCORESRC_DIR" ] && [ ! -d "$VIDEOCORESRC_DIR" ] ; then
+  echo "error: '${VIDEOCORESRC_DIR}' specified directory not found (VIDEOCORESRC_DIR)!"
   exit 1
 fi
 
@@ -432,7 +464,7 @@ fi
 mkdir -p "${R}"
 
 # Check if build directory has enough of free disk space >512MB
-if [ "$(df --output=avail ${BUILDDIR} | sed "1d")" -le "524288" ] ; then
+if [ "$(df --output=avail "${BUILDDIR}" | sed "1d")" -le "524288" ] ; then
   echo "error: ${BUILDDIR} not enough space left to generate the output image!"
   exit 1
 fi
@@ -447,11 +479,6 @@ if [ "$ENABLE_MINBASE" = true ] ; then
   APT_INCLUDES="${APT_INCLUDES},vim-tiny,netbase,net-tools,ifupdown"
 fi
 
-# Add required locales packages
-if [ "$DEFLOCAL" != "en_US.UTF-8" ] ; then
-  APT_INCLUDES="${APT_INCLUDES},locales,keyboard-configuration,console-setup"
-fi
-
 # Add parted package, required to get partprobe utility
 if [ "$EXPANDROOT" = true ] ; then
   APT_INCLUDES="${APT_INCLUDES},parted"
@@ -464,7 +491,7 @@ fi
 
 # Add iptables IPv4/IPv6 package
 if [ "$ENABLE_IPTABLES" = true ] ; then
-  APT_INCLUDES="${APT_INCLUDES},iptables"
+  APT_INCLUDES="${APT_INCLUDES},iptables,iptables-persistent"
 fi
 
 # Add openssh server package
@@ -510,12 +537,23 @@ if [ "$ENABLE_REDUCE" = true ] ; then
 
   # Add dropbear package instead of openssh-server
   if [ "$REDUCE_SSHD" = true ] ; then
-    APT_INCLUDES="$(echo ${APT_INCLUDES} | sed "s/openssh-server/dropbear/")"
+    APT_INCLUDES="$(echo "${APT_INCLUDES}" | sed "s/openssh-server/dropbear/")"
   fi
 fi
 
-if [ "$RELEASE" != "jessie" ] ; then
-  APT_INCLUDES="${APT_INCLUDES},libnss-systemd"
+# Configure systemd-sysv exclude to make halt/reboot/shutdown scripts available
+if [ "$ENABLE_SYSVINIT" = false ] ; then
+  APT_EXCLUDES="--exclude=${APT_EXCLUDES},init,systemd-sysv"
+fi
+
+# Check if kernel is getting compiled
+if [ "$BUILD_KERNEL" = false ] ; then
+  echo "Downloading precompiled kernel"
+  echo "error: not configured"
+  exit 1;
+# BUILD_KERNEL=true
+else
+  echo "No precompiled kernel repositories were added"
 fi
 
 # Configure kernel sources if no KERNELSRC_DIR
@@ -566,11 +604,6 @@ fi
 
 # Remove c/c++ build environment from the chroot
 chroot_remove_cc
-
-# Remove apt-utils
-if [ "$RELEASE" = "jessie" ] ; then
-  chroot_exec apt-get purge -qq -y --force-yes apt-utils
-fi
 
 # Generate required machine-id
 MACHINE_ID=$(dbus-uuidgen)
@@ -653,27 +686,27 @@ if [ "$ENABLE_QEMU" = true ] ; then
 fi
 
 # Calculate size of the chroot directory in KB
-CHROOT_SIZE=$(expr `du -s "${R}" | awk '{ print $1 }'`)
+CHROOT_SIZE=$(expr "$(du -s "${R}" | awk '{ print $1 }')")
 
 # Calculate the amount of needed 512 Byte sectors
 TABLE_SECTORS=$(expr 1 \* 1024 \* 1024 \/ 512)
 FRMW_SECTORS=$(expr 64 \* 1024 \* 1024 \/ 512)
-ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS})
+ROOT_OFFSET=$(expr "${TABLE_SECTORS}" + "${FRMW_SECTORS}")
 
 # The root partition is EXT4
 # This means more space than the actual used space of the chroot is used.
 # As overhead for journaling and reserved blocks 35% are added.
-ROOT_SECTORS=$(expr $(expr ${CHROOT_SIZE} + ${CHROOT_SIZE} \/ 100 \* 35) \* 1024 \/ 512)
+ROOT_SECTORS=$(expr "$(expr "${CHROOT_SIZE}" + "${CHROOT_SIZE}" \/ 100 \* 35)" \* 1024 \/ 512)
 
 # Calculate required image size in 512 Byte sectors
-IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS})
+IMAGE_SECTORS=$(expr "${TABLE_SECTORS}" + "${FRMW_SECTORS}" + "${ROOT_SECTORS}")
 
 # Prepare image file
 if [ "$ENABLE_SPLITFS" = true ] ; then
-  dd if=/dev/zero of="$IMAGE_NAME-frmw.img" bs=512 count=${TABLE_SECTORS}
-  dd if=/dev/zero of="$IMAGE_NAME-frmw.img" bs=512 count=0 seek=${FRMW_SECTORS}
-  dd if=/dev/zero of="$IMAGE_NAME-root.img" bs=512 count=${TABLE_SECTORS}
-  dd if=/dev/zero of="$IMAGE_NAME-root.img" bs=512 count=0 seek=${ROOT_SECTORS}
+  dd if=/dev/zero of="$IMAGE_NAME-frmw.img" bs=512 count="${TABLE_SECTORS}"
+  dd if=/dev/zero of="$IMAGE_NAME-frmw.img" bs=512 count=0 seek="${FRMW_SECTORS}"
+  dd if=/dev/zero of="$IMAGE_NAME-root.img" bs=512 count="${TABLE_SECTORS}"
+  dd if=/dev/zero of="$IMAGE_NAME-root.img" bs=512 count=0 seek="${ROOT_SECTORS}"
 
   # Write firmware/boot partition tables
   sfdisk -q -L -uS -f "$IMAGE_NAME-frmw.img" 2> /dev/null <<EOM
@@ -686,11 +719,11 @@ ${TABLE_SECTORS},${ROOT_SECTORS},83
 EOM
 
   # Setup temporary loop devices
-  FRMW_LOOP="$(losetup -o 1M --sizelimit 64M -f --show $IMAGE_NAME-frmw.img)"
-  ROOT_LOOP="$(losetup -o 1M -f --show $IMAGE_NAME-root.img)"
+  FRMW_LOOP="$(losetup -o 1M --sizelimit 64M -f --show "$IMAGE_NAME"-frmw.img)"
+  ROOT_LOOP="$(losetup -o 1M -f --show "$IMAGE_NAME"-root.img)"
 else # ENABLE_SPLITFS=false
-  dd if=/dev/zero of="$IMAGE_NAME.img" bs=512 count=${TABLE_SECTORS}
-  dd if=/dev/zero of="$IMAGE_NAME.img" bs=512 count=0 seek=${IMAGE_SECTORS}
+  dd if=/dev/zero of="$IMAGE_NAME.img" bs=512 count="${TABLE_SECTORS}"
+  dd if=/dev/zero of="$IMAGE_NAME.img" bs=512 count=0 seek="${IMAGE_SECTORS}"
 
   # Write partition table
   sfdisk -q -L -uS -f "$IMAGE_NAME.img" 2> /dev/null <<EOM
@@ -699,8 +732,8 @@ ${ROOT_OFFSET},${ROOT_SECTORS},83
 EOM
 
   # Setup temporary loop devices
-  FRMW_LOOP="$(losetup -o 1M --sizelimit 64M -f --show $IMAGE_NAME.img)"
-  ROOT_LOOP="$(losetup -o 65M -f --show $IMAGE_NAME.img)"
+  FRMW_LOOP="$(losetup -o 1M --sizelimit 64M -f --show "$IMAGE_NAME".img)"
+  ROOT_LOOP="$(losetup -o 65M -f --show "$IMAGE_NAME".img)"
 fi
 
 if [ "$ENABLE_CRYPTFS" = true ] ; then
@@ -725,7 +758,7 @@ if [ "$ENABLE_CRYPTFS" = true ] ; then
   ROOT_LOOP="/dev/mapper/${CRYPTFS_MAPPING}"
 
   # Wipe encrypted partition (encryption cipher is used for randomness)
-  dd if=/dev/zero of="${ROOT_LOOP}" bs=512 count=$(blockdev --getsz "${ROOT_LOOP}")
+  dd if=/dev/zero of="${ROOT_LOOP}" bs=512 count="$(blockdev --getsz "${ROOT_LOOP}")"
 fi
 
 # Build filesystems
@@ -752,22 +785,22 @@ if [ "$ENABLE_SPLITFS" = true ] ; then
   bmaptool create -o "$IMAGE_NAME-root.bmap" "$IMAGE_NAME-root.img"
 
   # Image was successfully created
-  echo "$IMAGE_NAME-frmw.img ($(expr \( ${TABLE_SECTORS} + ${FRMW_SECTORS} \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
-  echo "$IMAGE_NAME-root.img ($(expr \( ${TABLE_SECTORS} + ${ROOT_SECTORS} \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
+  echo "$IMAGE_NAME-frmw.img ($(expr \( "${TABLE_SECTORS}" + "${FRMW_SECTORS}" \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
+  echo "$IMAGE_NAME-root.img ($(expr \( "${TABLE_SECTORS}" + "${ROOT_SECTORS}" \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
 else
   # Create block map file for "bmaptool"
   bmaptool create -o "$IMAGE_NAME.bmap" "$IMAGE_NAME.img"
 
   # Image was successfully created
-  echo "$IMAGE_NAME.img ($(expr \( ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS} \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
+  echo "$IMAGE_NAME.img ($(expr \( "${TABLE_SECTORS}" + "${FRMW_SECTORS}" + "${ROOT_SECTORS}" \) \* 512 \/ 1024 \/ 1024)M)" ": successfully created"
 
   # Create qemu qcow2 image
   if [ "$ENABLE_QEMU" = true ] ; then
     QEMU_IMAGE=${QEMU_IMAGE:=${BASEDIR}/qemu/${DATE}-${KERNEL_ARCH}-CURRENT-rpi${RPI_MODEL}-${RELEASE}-${RELEASE_ARCH}}
     QEMU_SIZE=16G
 
-    qemu-img convert -f raw -O qcow2 $IMAGE_NAME.img $QEMU_IMAGE.qcow2
-    qemu-img resize $QEMU_IMAGE.qcow2 $QEMU_SIZE
+    qemu-img convert -f raw -O qcow2 "$IMAGE_NAME".img "$QEMU_IMAGE".qcow2
+    qemu-img resize "$QEMU_IMAGE".qcow2 $QEMU_SIZE
 
     echo "$QEMU_IMAGE.qcow2 ($QEMU_SIZE)" ": successfully created"
   fi
