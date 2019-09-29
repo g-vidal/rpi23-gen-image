@@ -1,7 +1,9 @@
 # rpi23-gen-image
 ## Introduction
 
+
 `rpi23-gen-image.sh` is an advanced Debian Linux bootstrapping shell script for generating Debian OS images for Raspberry Pi 2 (RPi2) and Raspberry Pi 3 (RPi3) computers. The script at this time supports the bootstrapping of the Debian (armhf) releases `jessie`, `stretch` and `buster`. Raspberry Pi 3 images are generated for 32-bit mode only. Raspberry Pi 3 64-bit images can be generated using custom configuration parameters (```templates/rpi3-stretch-arm64-4.11.y```).
+
 
 
 ## Build dependencies
@@ -9,18 +11,9 @@ The following list of Debian packages must be installed on the build system beca
 
   ```debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus sudo```
 
-It is recommended to configure the `rpi23-gen-image.sh` script to build and install the latest Raspberry Pi Linux kernel. For the RPi3 this is mandatory. Kernel compilation and linking will be performed on the build system using an ARM (armhf) cross-compiler toolchain.
+It is recommended to configure the `rpi23-gen-image.sh` script to build and install the latest Raspberry Pi Linux kernel. For the Raspberry 3 this is mandatory. Kernel compilation and linking will be performed on the build system using an ARM (armhf/armel) cross-compiler toolchain.
 
-The script has been tested using the default `crossbuild-essential-armhf` toolchain meta package on Debian Linux `jessie` and `stretch` build systems. Please check the [Debian CrossToolchains Wiki](https://wiki.debian.org/CrossToolchains) for further information.
-
-If a Debian Linux `jessie` build system is used it will be required to add the [Debian Cross-toolchains repository](http://emdebian.org/tools/debian/) first:
-
-```
-echo "deb http://emdebian.org/tools/debian/ jessie main" > /etc/apt/sources.list.d/crosstools.list
-sudo -u nobody wget -O - http://emdebian.org/tools/debian/emdebian-toolchain-archive.key | apt-key add -
-dpkg --add-architecture armhf
-apt-get update
-```
+The script has been tested using the default `crossbuild-essential-armhf` and `crossbuild-essential-armel` toolchain meta packages on Debian Linux `stretch` build systems. Please check the [Debian CrossToolchains Wiki](https://wiki.debian.org/CrossToolchains) for further information.
 
 ## Command-line parameters
 The script accepts certain command-line parameters to enable or disable specific OS features, services and configuration settings. These parameters are passed to the `rpi23-gen-image.sh` script via (simple) shell-variables. Unlike environment shell-variables (simple) shell-variables are defined at the beginning of the command-line call of the `rpi23-gen-image.sh` script.
@@ -57,28 +50,40 @@ CONFIG_TEMPLATE=rpi2stretch ./rpi23-gen-image.sh
 Set Debian packages server address. Choose a server from the list of Debian worldwide [mirror sites](https://www.debian.org/mirror/list). Using a nearby server will probably speed-up all required downloads within the bootstrapping process.
 
 ##### `APT_PROXY`=""
-Set Proxy server address. Using a local Proxy-Cache like `apt-cacher-ng` will speed-up the bootstrapping process because all required Debian packages will only be downloaded from the Debian mirror site once.
+Set Proxy server address. Using a local Proxy-Cache like `apt-cacher-ng` will speed-up the bootstrapping process because all required Debian packages will only be downloaded from the Debian mirror site once. If `apt-cacher-ng` is running on default `http://127.0.0.1:3142` it is autodetected and you don't need to set this.
+
+##### `KEEP_APT_PROXY`=false
+Keep the APT_PROXY settings used in the bootsrapping process in the generated image.
 
 ##### `APT_INCLUDES`=""
-A comma separated list of additional packages to be installed by debootstrap during bootstrapping.
+A comma-separated list of additional packages to be installed by debootstrap during bootstrapping.
 
 ##### `APT_INCLUDES_LATE`=""
-A comma separated list of additional packages to be installed by apt after bootstrapping and after APT sources are set up.  This is useful for packages with pre-depends, which debootstrap do not handle well.
+A comma-separated list of additional packages to be installed by apt after bootstrapping and after APT sources are set up.  This is useful for packages with pre-depends, which debootstrap do not handle well.
 
 ---
 
 #### General system settings:
-##### `RPI_MODEL`=2
-Specifiy the target Raspberry Pi hardware model. The script at this time supports the Raspberry Pi models `2` and `3`. `BUILD_KERNEL`=true will automatically be set if the Raspberry Pi model `3` is used.
+##### `SET_ARCH`=32
+Set Architecture to default 32bit. If you want to compile 64-bit (RPI3 or RPI3+) set it to `64`. This option will set every needed cross-compiler or board specific option for a successful build.
 
-##### `RELEASE`="jessie"
-Set the desired Debian release name. The script at this time supports the bootstrapping of the Debian releases "jessie", "stretch" and "buster". `BUILD_KERNEL`=true will automatically be set if the Debian releases `stretch` or `buster` are used.
+##### `RPI_MODEL`=2
+Specify the target Raspberry Pi hardware model. The script at this time supports the following Raspberry Pi models:
+- `0`  = Raspberry Pi 0 and Raspberry Pi 0 W
+- `1`  = Raspberry Pi 1 model A and B
+- `1P` = Raspberry Pi 1 model B+ and A+
+- `2`  = Raspberry Pi 2 model B
+- `3`  = Raspberry Pi 3 model B
+- `3P` = Raspberry Pi 3 model B+
+
+##### `RELEASE`="buster"
+Set the desired Debian release name. The script at this time supports the bootstrapping of the Debian releases `stretch` and `buster`.
 
 ##### `RELEASE_ARCH`="armhf"
 Set the desired Debian release architecture.
 
 ##### `HOSTNAME`="rpi$RPI_MODEL-$RELEASE"
-Set system host name. It's recommended that the host name is unique in the corresponding subnet.
+Set system hostname. It's recommended that the hostname is unique in the corresponding subnet.
 
 ##### `PASSWORD`="raspberry"
 Set system `root` password. It's **STRONGLY** recommended that you choose a custom password.
@@ -94,6 +99,12 @@ Set default system timezone. All available timezones can be found in the `/usr/s
 
 ##### `EXPANDROOT`=true
 Expand the root partition and filesystem automatically on first boot.
+
+##### `ENABLE_DPHYSSWAP`=true
+Enable swap. The size of the swapfile is chosen relative to the size of the root partition. It'll use the `dphys-swapfile` package for that.
+
+##### `ENABLE_QEMU`=false
+Generate kernel (`vexpress_defconfig`), file system image (`qcow2`) and DTB files that can be used for QEMU full system emulation (`vexpress-A15`). The output files are stored in the `$(pwd)/images/qemu` directory. You can find more information about running the generated image in the QEMU section of this readme file.
 
 ---
 
@@ -115,7 +126,7 @@ Set extra xkb configuration options.
 ---
 
 #### Networking settings (DHCP):
-This parameter is used to set up networking auto configuration in `/etc/systemd/network/eth.network`. The default location of network configuration files in the Debian `stretch` release was changed to `/lib/systemd/network`.`
+This parameter is used to set up networking auto-configuration in `/etc/systemd/network/eth.network`. The default location of network configuration files in the Debian `stretch` release was changed to `/lib/systemd/network`.`
 
 ##### `ENABLE_DHCP`=true
 Set the system to use DHCP. This requires an DHCP server.
@@ -138,7 +149,7 @@ Set the IP address for the first DNS server.
 Set the IP address for the second DNS server.
 
 ##### `NET_DNS_DOMAINS`=""
-Set the default DNS search domains to use for non fully qualified host names.
+Set the default DNS search domains to use for non fully qualified hostnames.
 
 ##### `NET_NTP_1`=""
 Set the IP address for the first NTP server.
@@ -150,13 +161,25 @@ Set the IP address for the second NTP server.
 
 #### Basic system features:
 ##### `ENABLE_CONSOLE`=true
-Enable serial console interface. Recommended if no monitor or keyboard is connected to the RPi2/3. In case of problems fe. if the network (auto) configuration failed - the serial console can be used to access the system.
+Enable serial console interface. Recommended if no monitor or keyboard is connected to the RPi2/3. In case of problems fe. if the network (auto) configuration failed - the serial console can be used to access the system. On RPI `0` `3` `3P` the CPU speed is locked at lowest speed.
+
+##### `ENABLE_PRINTK`=false
+Enables printing kernel messages to konsole. printk is `3 4 1 3` as in raspbian.
+
+##### `ENABLE_BLUETOOTH`=false
+Enable onboard Bluetooth interface on the RPi0/3/3P. See: [Configuring the GPIO serial port on Raspbian jessie and stretch](https://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3/).
+
+##### `ENABLE_MINIUART_OVERLAY`=false
+Enable Bluetooth to use this. Adds overlay to swap UART0 with UART1. Enabling (slower) Bluetooth and full speed serial console. - RPI `0` `3` `3P` have a fast `hardware UART0` (ttyAMA0) and a `mini UART1` (ttyS0)! RPI `1` `1P` `2` only have a `hardware UART0`. `UART0` is considered better, because is faster and more stable than `mini UART1`. By default the Bluetooth modem is mapped to the `hardware UART0` and `mini UART` is used for console. The `mini UART` is a problem for the serial console, because its baudrate depends on the CPU frequency, which is changing on runtime. Resulting in a volatile baudrate and thus in an unusable serial console.
+ 
+##### `ENABLE_TURBO`=false
+Enable Turbo mode. This setting locks cpu at the highest frequency. As setting ENABLE_CONSOLE=true locks RPI to lowest CPU speed, this is can be used additionally to lock cpu hat max speed. Need a good power supply and probably cooling for the Raspberry PI.
 
 ##### `ENABLE_I2C`=false
-Enable I2C interface on the RPi2/3. Please check the [RPi2/3 pinout diagrams](http://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
+Enable I2C interface on the RPi 0/1/2/3. Please check the [RPi 0/1/2/3 pinout diagrams](https://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
 
 ##### `ENABLE_SPI`=false
-Enable SPI interface on the RPi2/3. Please check the [RPi2/3 pinout diagrams](http://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
+Enable SPI interface on the RPi 0/1/2/3. Please check the [RPi 0/1/2/3 pinout diagrams](https://elinux.org/RPi_Low-level_peripherals) to connect the right GPIO pins.
 
 ##### `ENABLE_IPV6`=true
 Enable IPv6 support. The network interface configuration is managed via systemd-networkd.
@@ -168,17 +191,16 @@ Install and enable OpenSSH service. The default configuration of the service doe
 Allow the installation of non-free Debian packages that do not comply with the DFSG. This is required to install closed-source firmware binary blobs.
 
 ##### `ENABLE_WIRELESS`=false
-Download and install the [closed-source firmware binary blob](https://github.com/RPi-Distro/firmware-nonfree/tree/master/brcm80211/brcm) that is required to run the internal wireless interface of the Raspberry Pi model `3`. This parameter is ignored if the specified `RPI_MODEL` is not `3`.
+Download and install the [closed-source firmware binary blob](https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm) that is required to run the internal wireless interface of the Raspberry Pi model `3`. This parameter is ignored if the specified `RPI_MODEL` is not `3`.
 
 ##### `ENABLE_RSYSLOG`=true
-If set to false, disable and uninstall rsyslog (so logs will be available only
-in journal files)
+If set to false, disable and uninstall rsyslog (so logs will be available only in journal files)
 
 ##### `ENABLE_SOUND`=true
 Enable sound hardware and install Advanced Linux Sound Architecture.
 
 ##### `ENABLE_HWRANDOM`=true
-Enable Hardware Random Number Generator. Strong random numbers are important for most network based communications that use encryption. It's recommended to be enabled.
+Enable Hardware Random Number Generator. Strong random numbers are important for most network-based communications that use encryption. It's recommended to be enabled.
 
 ##### `ENABLE_MINGPU`=false
 Minimize the amount of shared memory reserved for the GPU. It doesn't seem to be possible to fully disable the GPU.
@@ -190,11 +212,17 @@ Install and enable D-Bus message bus. Please note that systemd should work witho
 Install Xorg open-source X Window System.
 
 ##### `ENABLE_WM`=""
-Install a user defined window manager for the X Window System. To make sure all X related package dependencies are getting installed `ENABLE_XORG` will automatically get enabled if `ENABLE_WM` is used. The `rpi23-gen-image.sh` script has been tested with the following list of window managers: `blackbox`, `openbox`, `fluxbox`, `jwm`, `dwm`, `xfce4`, `awesome`.
+Install a user-defined window manager for the X Window System. To make sure all X related package dependencies are getting installed `ENABLE_XORG` will automatically get enabled if `ENABLE_WM` is used. The `rpi23-gen-image.sh` script has been tested with the following list of window managers: `blackbox`, `openbox`, `fluxbox`, `jwm`, `dwm`, `xfce4`, `awesome`.
+
+##### `ENABLE_SYSVINIT`=false
+Support for halt,init,poweroff,reboot,runlevel,shutdown,telinit commands
 
 ---
 
 #### Advanced system features:
+##### `ENABLE_SYSTEMDSWAP`=false
+Enables [Systemd-swap service](https://github.com/Nefelim4ag/systemd-swap). Usefull if `KERNEL_ZSWAP` is enabled.
+
 ##### `ENABLE_MINBASE`=false
 Use debootstrap script variant `minbase` which only includes essential packages and apt. This will reduce the disk usage by about 65 MB.
 
@@ -202,10 +230,10 @@ Use debootstrap script variant `minbase` which only includes essential packages 
 Reduce the disk space usage by deleting packages and files. See `REDUCE_*` parameters for detailed information.
 
 ##### `ENABLE_UBOOT`=false
-Replace the default RPi2/3 second stage bootloader (bootcode.bin) with [U-Boot bootloader](http://git.denx.de/?p=u-boot.git;a=summary). U-Boot can boot images via the network using the BOOTP/TFTP protocol.
+Replace the default RPi 0/1/2/3 second stage bootloader (bootcode.bin) with [U-Boot bootloader](https://git.denx.de/?p=u-boot.git;a=summary). U-Boot can boot images via the network using the BOOTP/TFTP protocol.
 
 ##### `UBOOTSRC_DIR`=""
-Path to a directory (`u-boot`) of [U-Boot bootloader sources](http://git.denx.de/?p=u-boot.git;a=summary) that will be copied, configured, build and installed inside the chroot.
+Path to a directory (`u-boot`) of [U-Boot bootloader sources](https://git.denx.de/?p=u-boot.git;a=summary) that will be copied, configured, build and installed inside the chroot.
 
 ##### `ENABLE_FBTURBO`=false
 Install and enable the [hardware accelerated Xorg video driver](https://github.com/ssvb/xf86-video-fbturbo) `fbturbo`. Please note that this driver is currently limited to hardware accelerated window moving and scrolling.
@@ -213,11 +241,23 @@ Install and enable the [hardware accelerated Xorg video driver](https://github.c
 ##### `FBTURBOSRC_DIR`=""
 Path to a directory (`xf86-video-fbturbo`) of [hardware accelerated Xorg video driver sources](https://github.com/ssvb/xf86-video-fbturbo) that will be copied, configured, build and installed inside the chroot.
 
+##### `ENABLE_VIDEOCORE`=false
+Install and enable the [ARM side libraries for interfacing to Raspberry Pi GPU](https://github.com/raspberrypi/userland) `vcgencmd`. Please note that this driver is currently limited to hardware accelerated window moving and scrolling.
+
+##### `VIDEOCORESRC_DIR`=""
+Path to a directory (`userland`) of [ARM side libraries for interfacing to Raspberry Pi GPU](https://github.com/raspberrypi/userland) that will be copied, configured, build and installed inside the chroot.
+
+##### `ENABLE_NEXMON`=false
+Install and enable the [Source code for a C-based firmware patching framework for Broadcom/Cypress WiFi chips that enables you to write your own firmware patches, for example, to enable monitor mode with radiotap headers and frame injection](https://github.com/seemoo-lab/nexmon.git).
+
+##### `NEXMONSRC_DIR`=""
+Path to a directory (`nexmon`) of [Source code for ARM side libraries for interfacing to Raspberry Pi GPU](https://github.com/raspberrypi/userland) that will be copied, configured, build and installed inside the chroot.
+
 ##### `ENABLE_IPTABLES`=false
 Enable iptables IPv4/IPv6 firewall. Simplified ruleset: Allow all outgoing connections. Block all incoming connections except to OpenSSH service.
 
 ##### `ENABLE_USER`=true
-Create non-root user with password `USER_PASSWORD`=raspberry. Unless overridden with `USER_NAME`=user, username will be `pi`.
+Create non-root user with password `USER_PASSWORD`=raspberry. Unless overridden with `USER_NAME`=user, the username will be `pi`.
 
 ##### `USER_NAME`=pi
 Non-root user to create.  Ignored if `ENABLE_USER`=false
@@ -238,7 +278,16 @@ Path to a directory with scripts that should be run in the chroot before the ima
 Create an initramfs that that will be loaded during the Linux startup process. `ENABLE_INITRAMFS` will automatically get enabled if `ENABLE_CRYPTFS`=true. This parameter will be ignored if `BUILD_KERNEL`=false.
 
 ##### `ENABLE_IFNAMES`=true
-Enable automatic assignment of predictable, stable network interface names for all local Ethernet, WLAN interfaces. This might create complex and long interface names. This parameter is only supported if the Debian releases `stretch` or `buster` are used.
+Enable automatic assignment of predictable, stable network interface names for all local Ethernet, WLAN interfaces. This might create complex and long interface names.
+
+##### `ENABLE_SPLASH`=true
+Enable default Raspberry Pi boot up rainbow splash screen.
+
+##### `ENABLE_LOGO`=true
+Enable default Raspberry Pi console logo (image of four raspberries in the top left corner).
+
+##### `ENABLE_SILENT_BOOT`=false
+Set the verbosity of console messages shown during boot up to a strict minimum.
 
 ##### `DISABLE_UNDERVOLT_WARNINGS`=
 Disable RPi2/3 under-voltage warnings and overlays. Setting the parameter to `1` will disable the warning overlay. Setting it to `2` will additionally allow RPi2/3 turbo mode when low-voltage is present.
@@ -247,10 +296,10 @@ Disable RPi2/3 under-voltage warnings and overlays. Setting the parameter to `1`
 
 #### SSH settings:
 ##### `SSH_ENABLE_ROOT`=false
-Enable password root login via SSH. This may be a security risk with default password, use only in trusted environments. `ENABLE_ROOT` must be set to `true`.
+Enable password-based root login via SSH. This may be a security risk with the default password set, use only in trusted environments. `ENABLE_ROOT` must be set to `true`.
 
 ##### `SSH_DISABLE_PASSWORD_AUTH`=false
-Disable password based SSH authentication. Only public key based SSH (v2) authentication will be supported.
+Disable password-based SSH authentication. Only public key based SSH (v2) authentication will be supported.
 
 ##### `SSH_LIMIT_USERS`=false
 Limit the users that are allowed to login via SSH. Only allow user `USER_NAME`=pi and root if `SSH_ENABLE_ROOT`=true to login. This parameter will be ignored if `dropbear` SSH is used (`REDUCE_SSHD`=true).
@@ -264,11 +313,11 @@ Add SSH (v2) public key(s) from specified file to `authorized_keys` file to enab
 ---
 
 #### Kernel compilation:
-##### `BUILD_KERNEL`=false
-Build and install the latest RPi2/3 Linux kernel. Currently only the default RPi2/3 kernel configuration is used. `BUILD_KERNEL`=true will automatically be set if the Raspberry Pi model `3` is used.
+##### `BUILD_KERNEL`=true
+Build and install the latest RPi 0/1/2/3 Linux kernel. Currently only the default RPi 0/1/2/3 kernel configuration is used.
 
 ##### `CROSS_COMPILE`="arm-linux-gnueabihf-"
-This sets the cross compile enviornment for the compiler.
+This sets the cross-compile environment for the compiler.
 
 ##### `KERNEL_ARCH`="arm"
 This sets the kernel architecture for the compiler.
@@ -286,16 +335,22 @@ Sets the QEMU enviornment for the Debian archive. If not set, `QEMU_BINARY` will
 Sets the default config for kernel compiling. If not set, `KERNEL_DEFCONFIG` will be set to "bcmrpi3\_defconfig" automatically if building for arm64.
 
 ##### `KERNEL_REDUCE`=false
-Reduce the size of the generated kernel by removing unwanted device, network and filesystem drivers (experimental).
+Reduce the size of the generated kernel by removing unwanted devices, network and filesystem drivers (experimental).
 
 ##### `KERNEL_THREADS`=1
 Number of parallel kernel building threads. If the parameter is left untouched the script will automatically determine the number of CPU cores to set the number of parallel threads to speed the kernel compilation.
 
 ##### `KERNEL_HEADERS`=true
-Install kernel headers with built kernel.
+Install kernel headers with the built kernel.
 
 ##### `KERNEL_MENUCONFIG`=false
 Start `make menuconfig` interactive menu-driven kernel configuration. The script will continue after `make menuconfig` was terminated.
+
+##### `KERNEL_OLDDEFCONFIG`=false
+Run `make olddefconfig` to automatically set all new kernel configuration options to their recommended default values.
+
+##### `KERNEL_CCACHE`=false
+Compile the kernel using ccache. This speeds up kernel recompilation by caching previous compilations and detecting when the same compilation is being done again.
 
 ##### `KERNEL_REMOVESRC`=true
 Remove all kernel sources from the generated OS image after it was built and installed.
@@ -317,6 +372,24 @@ With this parameter set to true the script expects the existing kernel sources d
 
 ##### `RPI_FIRMWARE_DIR`=""
 The directory (`firmware`) containing a local copy of the firmware from the [RaspberryPi firmware project](https://github.com/raspberrypi/firmware). Default is to download the latest firmware directly from the project.
+
+##### `KERNEL_DEFAULT_GOV`="ONDEMAND"
+Set the default cpu governor at kernel compilation. Supported values are: PERFORMANCE POWERSAVE USERSPACE ONDEMAND CONSERVATIVE SCHEDUTIL
+
+##### `KERNEL_NF`=false
+Enable Netfilter modules as kernel modules
+
+##### `KERNEL_VIRT`=false
+Enable Kernel KVM support (/dev/kvm)
+
+##### `KERNEL_ZSWAP`=false
+Enable Kernel Zswap support. Best use on high RAM load and mediocre CPU load usecases
+
+##### `KERNEL_BPF`=true
+Allow attaching eBPF programs to a cgroup using the bpf syscall (CONFIG_BPF_SYSCALL CONFIG_CGROUP_BPF) [systemd compilations about it - File /lib/systemd/system/systemd-journald.server:36 configures an IP firewall (IPAddressDeny=all), but the local system does not support BPF/cgroup based firewalls]
+
+##### `KERNEL_SECURITY`=false
+Enables Apparmor, integrity subsystem, auditing.
 
 ---
 
@@ -365,6 +438,12 @@ Set cipher specification string. `aes-xts*` ciphers are strongly recommended.
 ##### `CRYPTFS_XTSKEYSIZE`=512
 Sets key size in bits. The argument has to be a multiple of 8.
 
+##### `CRYPTFS_DROPBEAR`=false
+Enable Dropbear Initramfs support
+
+##### `CRYPTFS_DROPBEAR_PUBKEY`=""
+Provide path to dropbear Public RSA-OpenSSH Key
+
 ---
 
 #### Build settings:
@@ -382,9 +461,9 @@ The functions of this script that are required for the different stages of the b
 | `10-bootstrap.sh` | Debootstrap basic system |
 | `11-apt.sh` | Setup APT repositories |
 | `12-locale.sh` | Setup Locales and keyboard settings |
-| `13-kernel.sh` | Build and install RPi2/3 Kernel |
+| `13-kernel.sh` | Build and install RPi 0/1/2/3 Kernel |
 | `14-fstab.sh` | Setup fstab and initramfs |
-| `15-rpi-config.sh` | Setup RPi2/3 config and cmdline |
+| `15-rpi-config.sh` | Setup RPi 0/1/2/3 config and cmdline |
 | `20-networking.sh` | Setup Networking |
 | `21-firewall.sh` | Setup Firewall |
 | `30-security.sh` | Setup Users and Security settings |
@@ -392,6 +471,7 @@ The functions of this script that are required for the different stages of the b
 | `32-sshd.sh` | Setup SSH and public keys |
 | `41-uboot.sh` | Build and Setup U-Boot |
 | `42-fbturbo.sh` | Build and Setup fbturbo Xorg driver |
+| `43-videocore.sh` | Build and Setup videocore libraries |
 | `50-firstboot.sh` | First boot actions |
 | `99-reduce.sh` | Reduce the disk space usage |
 
@@ -400,7 +480,7 @@ All the required configuration files that will be copied to the generated OS ima
 | Directory | Description |
 | --- | --- |
 | `apt` | APT management configuration files |
-| `boot` | Boot and RPi2/3 configuration files |
+| `boot` | Boot and RPi 0/1/2/3 configuration files |
 | `dpkg` | Package Manager configuration |
 | `etc` | Configuration files and rc scripts |
 | `firstboot` | Scripts that get executed on first boot  |
@@ -426,21 +506,39 @@ script -c 'APT_SERVER=ftp.de.debian.org ./rpi23-gen-image.sh' ./build.log
 ```
 
 ## Flashing the image file
-After the image file was successfully created by the `rpi23-gen-image.sh` script it can be copied to the microSD card that will be used by the RPi2/3 computer. This can be performed by using the tools `bmaptool` or `dd`. Using `bmaptool` will probably speed-up the copy process because `bmaptool` copies more wisely than `dd`.
+After the image file was successfully created by the `rpi23-gen-image.sh` script it can be copied to the microSD card that will be used by the RPi 0/1/2/3 computer. This can be performed by using the tools `bmaptool` or `dd`. Using `bmaptool` will probably speed-up the copy process because `bmaptool` copies more wisely than `dd`.
 
 ##### Flashing examples:
 ```shell
-bmaptool copy ./images/jessie/2017-01-23-rpi3-jessie.img /dev/mmcblk0
-dd bs=4M if=./images/jessie/2017-01-23-rpi3-jessie.img of=/dev/mmcblk0
+bmaptool copy ./images/buster/2017-01-23-rpi3-buster.img /dev/mmcblk0
+dd bs=4M if=./images/buster/2017-01-23-rpi3-buster.img of=/dev/mmcblk0
 ```
 If you have set `ENABLE_SPLITFS`, copy the `-frmw` image on the microSD card, then the `-root` one on the USB drive:
 ```shell
-bmaptool copy ./images/jessie/2017-01-23-rpi3-jessie-frmw.img /dev/mmcblk0
-bmaptool copy ./images/jessie/2017-01-23-rpi3-jessie-root.img /dev/sdc
+bmaptool copy ./images/buster/2017-01-23-rpi3-buster-frmw.img /dev/mmcblk0
+bmaptool copy ./images/buster/2017-01-23-rpi3-buster-root.img /dev/sdc
 ```
-## Weekly image builds
-The image files are provided by JRWR'S I/O PORT and are built once a Sunday at midnight UTC!
-* [Debian Stretch Raspberry Pi2/3 Weekly Image Builds](https://jrwr.io/doku.php?id=projects:debianpi)
+
+## QEMU emulation
+Start QEMU full system emulation:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -append "root=/dev/mmcblk0p2 rw rootfstype=ext4 console=tty1"
+```
+
+Start QEMU full system emulation and output to console:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -append "root=/dev/mmcblk0p2 rw rootfstype=ext4 console=ttyAMA0,115200 init=/bin/systemd" -serial stdio
+```
+
+Start QEMU full system emulation with SMP and output to console:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -smp cpus=2,maxcpus=2 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -append "root=/dev/mmcblk0p2 rw rootfstype=ext4 console=ttyAMA0,115200 init=/bin/systemd" -serial stdio
+```
+
+Start QEMU full system emulation with cryptfs, initramfs and output to console:
+```shell
+qemu-system-arm -m 2048M -M vexpress-a15 -cpu cortex-a15 -kernel kernel7.img -no-reboot -dtb vexpress-v2p-ca15_a7.dtb -sd ${IMAGE_NAME}.qcow2 -initrd "initramfs-${KERNEL_VERSION}" -append "root=/dev/mapper/secure cryptdevice=/dev/mmcblk0p2:secure rw rootfstype=ext4 console=ttyAMA0,115200 init=/bin/systemd" -serial stdio
+```
 
 ## External links and references
 * [Debian worldwide mirror sites](https://www.debian.org/mirror/list)
@@ -448,7 +546,7 @@ The image files are provided by JRWR'S I/O PORT and are built once a Sunday at m
 * [Debian CrossToolchains Wiki](https://wiki.debian.org/CrossToolchains)
 * [Official Raspberry Pi Firmware on github](https://github.com/raspberrypi/firmware)
 * [Official Raspberry Pi Kernel on github](https://github.com/raspberrypi/linux)
-* [U-BOOT git repository](http://git.denx.de/?p=u-boot.git;a=summary)
+* [U-BOOT git repository](https://git.denx.de/?p=u-boot.git;a=summary)
 * [Xorg DDX driver fbturbo](https://github.com/ssvb/xf86-video-fbturbo)
-* [RPi3 Wireless interface firmware](https://github.com/RPi-Distro/firmware-nonfree/tree/master/brcm80211/brcm)
+* [RPi3 Wireless interface firmware](https://github.com/RPi-Distro/firmware-nonfree/tree/master/brcm)
 * [Collabora RPi2 Kernel precompiled](https://repositories.collabora.co.uk/debian/)

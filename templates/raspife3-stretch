@@ -1,3 +1,4 @@
+
 # Configuration file raspi3 Stretch IFÉ 2017/07/26
 #
 APT_SERVER=ftp.fr.debian.org 
@@ -23,7 +24,7 @@ RPI_MODEL=3
 RELEASE="stretch" 
 HOSTNAME="raspife3" 
 PASSWORD="**************"
-USER_PASSWORD="***************"
+USER_PASSWORD="***************
 DEFLOCAL="fr_FR.UTF-8" 
 TIMEZONE="Europe/Paris"
 EXPANDROOT=false
@@ -63,11 +64,11 @@ ENABLE_INITRAMFS=true
 ENABLE_IFNAMES=true
 #------------------------
 ENABLE_ROOT_SSH=false  
-SSH_LIMIT_USERS=false
+SSH_LIMIT_USERS=fal
 SSH_ROOT_PUB_KEY="/home/*******/.ssh/authorized_keys"
 SSH_USER_PUB_KEY="/home/*******/.ssh/authorized_keys"
 #------------------------
-BUILD_KERNEL=true 
+BUILD_KERNEL=true
 KERNEL_REDUCE=false
 KERNEL_HEADERS=true
 KERNEL_REMOVESRC=true

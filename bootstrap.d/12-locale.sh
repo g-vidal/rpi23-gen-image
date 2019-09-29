@@ -6,24 +6,32 @@
 . ./functions.sh
 
 # Install and setup timezone
-echo ${TIMEZONE} > "${ETC_DIR}/timezone"
+echo "${TIMEZONE}" > "${ETC_DIR}/timezone"
+if [ -f "${ETC_DIR}/localtime" ]; then
+    # 1. If 11-apt.sh upgrades the package 'tzdata', '/etc/localtime' was created
+    #    because 'dpkg-reconfigure -f noninteractive tzdata' was executed by apt-get.
+    # 2. If '/etc/localtime' exists, our execution of 'dpkg-reconfigure -f noninteractive tzdata' 
+    #    will ignore the our timezone set in '/etc/timezone'.
+    # 3. Removing /etc/localtime will solve this.
+    rm -f "${ETC_DIR}/localtime"
+fi
 chroot_exec dpkg-reconfigure -f noninteractive tzdata
 
 # Install and setup default locale and keyboard configuration
-if [ $(echo "$APT_INCLUDES" | grep ",locales") ] ; then
+if [ "$(echo "$APT_INCLUDES" | grep ",locales")" ] ; then
   # Set locale choice in debconf db, even though dpkg-reconfigure ignores and overwrites them due to some bug
   # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=684134 https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=685957
   # ... so we have to set locales manually
   if [ "$DEFLOCAL" = "en_US.UTF-8" ] ; then
-    chroot_exec echo "locales locales/locales_to_be_generated multiselect ${DEFLOCAL} UTF-8" | debconf-set-selections
+    chroot_exec echo "locales locales/locales_to_be_generated multiselect ${DEFLOCAL} UTF-8 | debconf-set-selections"
   else
     # en_US.UTF-8 should be available anyway : https://www.debian.org/doc/manuals/debian-reference/ch08.en.html#_the_reconfiguration_of_the_locale
-    chroot_exec echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8, ${DEFLOCAL} UTF-8" | debconf-set-selections
+    chroot_exec echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8, ${DEFLOCAL} UTF-8 | debconf-set-selections"
     sed -i "/en_US.UTF-8/s/^#//" "${ETC_DIR}/locale.gen"
   fi
 
   sed -i "/${DEFLOCAL}/s/^#//" "${ETC_DIR}/locale.gen"
-  chroot_exec echo "locales locales/default_environment_locale select ${DEFLOCAL}" | debconf-set-selections
+  chroot_exec echo "locales locales/default_environment_locale select ${DEFLOCAL} | debconf-set-selections"
   chroot_exec locale-gen
   chroot_exec update-locale LANG="${DEFLOCAL}"
 
