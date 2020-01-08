@@ -12,6 +12,7 @@ The following list of Debian packages must be installed on the build system beca
   ```debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus sudo```
 
 It is recommended to configure the `rpi23-gen-image.sh` script to build and install the latest Raspberry Pi Linux kernel. For the Raspberry 3 this is mandatory. Kernel compilation and linking will be performed on the build system using an ARM (armhf/armel) cross-compiler toolchain.
+It is recommended to configure the `rpi23-gen-image.sh` script to build and install the latest Raspberry Pi Linux kernel. For the Raspberry 3 this is mandatory. Kernel compilation and linking will be performed on the build system using an ARM (armhf/armel/aarch64) cross-compiler toolchain.
 
 The script has been tested using the default `crossbuild-essential-armhf` and `crossbuild-essential-armel` toolchain meta packages on Debian Linux `stretch` build systems. Please check the [Debian CrossToolchains Wiki](https://wiki.debian.org/CrossToolchains) for further information.
 
@@ -66,6 +67,7 @@ A comma-separated list of additional packages to be installed by apt after boots
 #### General system settings:
 ##### `SET_ARCH`=32
 Set Architecture to default 32bit. If you want to compile 64-bit (RPI3 or RPI3+) set it to `64`. This option will set every needed cross-compiler or board specific option for a successful build.
+Set Architecture to default 32bit. If you want to compile 64-bit (RPI3/RPI3+/RPI4) set it to `64`. This option will set every needed cross-compiler or board specific option for a successful build.
 
 ##### `RPI_MODEL`=2
 Specify the target Raspberry Pi hardware model. The script at this time supports the following Raspberry Pi models:
@@ -75,6 +77,7 @@ Specify the target Raspberry Pi hardware model. The script at this time supports
 - `2`  = Raspberry Pi 2 model B
 - `3`  = Raspberry Pi 3 model B
 - `3P` = Raspberry Pi 3 model B+
+- `4`  = Raspberry Pi 4 model B
 
 ##### `RELEASE`="buster"
 Set the desired Debian release name. The script at this time supports the bootstrapping of the Debian releases `stretch` and `buster`.
@@ -220,6 +223,9 @@ Support for halt,init,poweroff,reboot,runlevel,shutdown,telinit commands
 ---
 
 #### Advanced system features:
+##### `ENABLE_KEYGEN`=false
+Recover your lost codec license
+
 ##### `ENABLE_SYSTEMDSWAP`=false
 Enables [Systemd-swap service](https://github.com/Nefelim4ag/systemd-swap). Usefull if `KERNEL_ZSWAP` is enabled.
 
@@ -231,6 +237,7 @@ Reduce the disk space usage by deleting packages and files. See `REDUCE_*` param
 
 ##### `ENABLE_UBOOT`=false
 Replace the default RPi 0/1/2/3 second stage bootloader (bootcode.bin) with [U-Boot bootloader](https://git.denx.de/?p=u-boot.git;a=summary). U-Boot can boot images via the network using the BOOTP/TFTP protocol.
+RPI4 needs tbd
 
 ##### `UBOOTSRC_DIR`=""
 Path to a directory (`u-boot`) of [U-Boot bootloader sources](https://git.denx.de/?p=u-boot.git;a=summary) that will be copied, configured, build and installed inside the chroot.
@@ -315,6 +322,11 @@ Add SSH (v2) public key(s) from specified file to `authorized_keys` file to enab
 #### Kernel compilation:
 ##### `BUILD_KERNEL`=true
 Build and install the latest RPi 0/1/2/3 Linux kernel. Currently only the default RPi 0/1/2/3 kernel configuration is used.
+Build and install the latest RPi 0/1/2/3/4 Linux kernel. The default RPi 0/1/2/3/ kernel configuration is used most of the time. 
+ENABLE_NEXMON - Changes Kernel Source to [https://github.com/Re4son/](Kali Linux Kernel)
+Precompiled 32bit kernel for RPI0/1/2/3 by [https://github.com/hypriot/](hypriot)
+Precompiled 64bit kernel for RPI3/4 by [https://github.com/sakaki-/](sakaki)
+
 
 ##### `CROSS_COMPILE`="arm-linux-gnueabihf-"
 This sets the cross-compile environment for the compiler.
@@ -391,6 +403,18 @@ Allow attaching eBPF programs to a cgroup using the bpf syscall (CONFIG_BPF_SYSC
 ##### `KERNEL_SECURITY`=false
 Enables Apparmor, integrity subsystem, auditing.
 
+##### `KERNEL_BTRFS`="false"
+enable btrfs kernel support
+
+##### `KERNEL_POEHAT`="false"
+enable Enable RPI POE HAT fan kernel support
+
+##### `KERNEL_NSPAWN`="false"
+Enable per-interface network priority control - for systemd-nspawn
+
+##### `KERNEL_DHKEY`="true"
+Diffie-Hellman operations on retained keys - required for >keyutils-1.6
+
 ---
 
 #### Reduce disk usage:
@@ -433,7 +457,11 @@ Set password of the encrypted root partition. This parameter is mandatory if `EN
 Set name of dm-crypt managed device-mapper mapping.
 
 ##### `CRYPTFS_CIPHER`="aes-xts-plain64:sha512"
+##### `CRYPTFS_CIPHER`="aes-xts-plain64"
 Set cipher specification string. `aes-xts*` ciphers are strongly recommended.
+
+##### `CRYPTFS_HASH`=sha512
+Hash function and size to be used
 
 ##### `CRYPTFS_XTSKEYSIZE`=512
 Sets key size in bits. The argument has to be a multiple of 8.
