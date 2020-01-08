@@ -1,17 +1,24 @@
 # rpi23-gen-image
 ## Introduction
+<<<<<<< HEAD
 
 
 `rpi23-gen-image.sh` is an advanced Debian Linux bootstrapping shell script for generating Debian OS images for Raspberry Pi 2 (RPi2) and Raspberry Pi 3 (RPi3) computers. The script at this time supports the bootstrapping of the Debian (armhf) releases `jessie`, `stretch` and `buster`. Raspberry Pi 3 images are generated for 32-bit mode only. Raspberry Pi 3 64-bit images can be generated using custom configuration parameters (```templates/rpi3-stretch-arm64-4.11.y```).
 
 
+=======
+`rpi23-gen-image.sh` is an advanced Debian Linux bootstrapping shell script for generating Debian OS images for all Raspberry Pi computers. The script at this time supports the bootstrapping of the Debian (armhf/armel) releases `stretch` and `buster`. Raspberry Pi 0/1/2/3/4 images are generated for 32-bit mode only. Raspberry Pi 3 supports 64-bit images that can be generated using custom configuration parameters (```templates/rpi3-stretch-arm64-4.14.y```).
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 
 ## Build dependencies
 The following list of Debian packages must be installed on the build system because they are essentially required for the bootstrapping process. The script will check if all required packages are installed and missing packages will be installed automatically if confirmed by the user.
 
   ```debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus sudo```
 
+<<<<<<< HEAD
 It is recommended to configure the `rpi23-gen-image.sh` script to build and install the latest Raspberry Pi Linux kernel. For the Raspberry 3 this is mandatory. Kernel compilation and linking will be performed on the build system using an ARM (armhf/armel) cross-compiler toolchain.
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 It is recommended to configure the `rpi23-gen-image.sh` script to build and install the latest Raspberry Pi Linux kernel. For the Raspberry 3 this is mandatory. Kernel compilation and linking will be performed on the build system using an ARM (armhf/armel/aarch64) cross-compiler toolchain.
 
 The script has been tested using the default `crossbuild-essential-armhf` and `crossbuild-essential-armel` toolchain meta packages on Debian Linux `stretch` build systems. Please check the [Debian CrossToolchains Wiki](https://wiki.debian.org/CrossToolchains) for further information.
@@ -66,7 +73,10 @@ A comma-separated list of additional packages to be installed by apt after boots
 
 #### General system settings:
 ##### `SET_ARCH`=32
+<<<<<<< HEAD
 Set Architecture to default 32bit. If you want to compile 64-bit (RPI3 or RPI3+) set it to `64`. This option will set every needed cross-compiler or board specific option for a successful build.
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 Set Architecture to default 32bit. If you want to compile 64-bit (RPI3/RPI3+/RPI4) set it to `64`. This option will set every needed cross-compiler or board specific option for a successful build.
 
 ##### `RPI_MODEL`=2
@@ -321,7 +331,10 @@ Add SSH (v2) public key(s) from specified file to `authorized_keys` file to enab
 
 #### Kernel compilation:
 ##### `BUILD_KERNEL`=true
+<<<<<<< HEAD
 Build and install the latest RPi 0/1/2/3 Linux kernel. Currently only the default RPi 0/1/2/3 kernel configuration is used.
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 Build and install the latest RPi 0/1/2/3/4 Linux kernel. The default RPi 0/1/2/3/ kernel configuration is used most of the time. 
 ENABLE_NEXMON - Changes Kernel Source to [https://github.com/Re4son/](Kali Linux Kernel)
 Precompiled 32bit kernel for RPI0/1/2/3 by [https://github.com/hypriot/](hypriot)
@@ -456,7 +469,10 @@ Set password of the encrypted root partition. This parameter is mandatory if `EN
 ##### `CRYPTFS_MAPPING`="secure"
 Set name of dm-crypt managed device-mapper mapping.
 
+<<<<<<< HEAD
 ##### `CRYPTFS_CIPHER`="aes-xts-plain64:sha512"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 ##### `CRYPTFS_CIPHER`="aes-xts-plain64"
 Set cipher specification string. `aes-xts*` ciphers are strongly recommended.
 

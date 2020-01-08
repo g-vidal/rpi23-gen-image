@@ -55,7 +55,6 @@ KERNEL_BRANCH=${KERNEL_BRANCH:=""}
 KERNEL_URL=${KERNEL_URL:=https://github.com/raspberrypi/linux}
 FIRMWARE_URL=${FIRMWARE_URL:=https://github.com/raspberrypi/firmware/raw/master/boot}
 WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm}
-COLLABORA_URL=${COLLABORA_URL:=https://repositories.collabora.co.uk/debian}
 FBTURBO_URL=${FBTURBO_URL:=https://github.com/ssvb/xf86-video-fbturbo.git}
 UBOOT_URL=${UBOOT_URL:=https://git.denx.de/u-boot.git}
 VIDEOCORE_URL=${VIDEOCORE_URL:=https://github.com/raspberrypi/userland}
@@ -67,10 +66,15 @@ SYSTEMDSWAP_URL=${SYSTEMDSWAP_URL:=https://github.com/Nefelim4ag/systemd-swap.gi
 RPI_32_KERNEL_URL=${RPI_32_KERNEL_URL:=https://github.com/hypriot/rpi-kernel/releases/download/v4.14.34/raspberrypi-kernel_20180422-141901_armhf.deb}
 RPI_32_KERNELHEADER_URL=${RPI_32_KERNELHEADER_URL:=https://github.com/hypriot/rpi-kernel/releases/download/v4.14.34/raspberrypi-kernel-headers_20180422-141901_armhf.deb}
 # Kernel has KVM and zswap enabled - use if KERNEL_* parameters and precompiled kernel are used 
+<<<<<<< HEAD
 RPI3_64_BIS_KERNEL_URL=${RPI3_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel-bis/releases/download/4.14.80.20181113/bcmrpi3-kernel-bis-4.14.80.20181113.tar.xz}
 RPI3_64_BIS_KERNEL_URL=${RPI3_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel-bis/releases/download/4.19.80.20191022/bcmrpi3-kernel-bis-4.19.80.20191022.tar.xz}
 # Default precompiled 64bit kernel
 RPI3_64_DEF_KERNEL_URL=${RPI3_64_DEF_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel/releases/download/4.14.80.20181113/bcmrpi3-kernel-4.14.80.20181113.tar.xz}
+=======
+RPI3_64_BIS_KERNEL_URL=${RPI3_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel-bis/releases/download/4.19.80.20191022/bcmrpi3-kernel-bis-4.19.80.20191022.tar.xz}
+# Default precompiled 64bit kernel
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 RPI3_64_DEF_KERNEL_URL=${RPI3_64_DEF_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel/releases/download/4.19.80.20191022/bcmrpi3-kernel-4.19.80.20191022.tar.xz}
 # Sakaki BIS Kernel RPI4 - https://github.com/sakaki-/bcm2711-kernel-bis
 RPI4_64_BIS_KERNEL_URL=${RPI4_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcm2711-kernel-bis/releases/download/4.19.59.20190724/bcm2711-kernel-bis-4.19.59.20190724.tar.xz}
@@ -226,7 +230,10 @@ REDUCE_LOCALE=${REDUCE_LOCALE:=true}
 ENABLE_CRYPTFS=${ENABLE_CRYPTFS:=false}
 CRYPTFS_PASSWORD=${CRYPTFS_PASSWORD:=""}
 CRYPTFS_MAPPING=${CRYPTFS_MAPPING:="secure"}
+<<<<<<< HEAD
 CRYPTFS_CIPHER=${CRYPTFS_CIPHER:="aes-xts-plain64:sha512"}
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 CRYPTFS_CIPHER=${CRYPTFS_CIPHER:="aes-xts-plain64"}
 CRYPTFS_HASH=${CRYPTFS_HASH:="sha512"}
 CRYPTFS_XTSKEYSIZE=${CRYPTFS_XTSKEYSIZE:=512}
@@ -240,14 +247,20 @@ CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
 # Packages required in the chroot build environment
 APT_INCLUDES=${APT_INCLUDES:=""}
+<<<<<<< HEAD
 APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils,locales,keyboard-configuration,console-setup,libnss-systemd"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 APT_INCLUDES="${APT_INCLUDES},flex,bison,libssl-dev,apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils,locales,keyboard-configuration,console-setup,libnss-systemd"
 
 # Packages to exclude from chroot build environment
 APT_EXCLUDES=${APT_EXCLUDES:=""}
 
 # Packages required for bootstrapping
+<<<<<<< HEAD
 REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus sudo"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus bison flex libssl-dev sudo"
 MISSING_PACKAGES=""
 
@@ -315,7 +328,10 @@ if [ -n "$SET_ARCH" ] ; then
       
       REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
       RELEASE_ARCH=${RELEASE_ARCH:=armhf}
+<<<<<<< HEAD
       KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
       
       CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabihf-}
     fi
@@ -406,7 +422,10 @@ fi
 
 # Add deps for nexmon
 if [ "$ENABLE_NEXMON" = true ] ; then
+<<<<<<< HEAD
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libgmp3-dev gawk qpdf bison flex make autoconf automake build-essential libtool"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libgmp3-dev gawk qpdf make autoconf automake build-essential libtool"
 fi
 
@@ -423,7 +442,10 @@ fi
 # Add cryptsetup package to enable filesystem encryption
 if [ "$ENABLE_CRYPTFS" = true ]  && [ "$BUILD_KERNEL" = true ] ; then
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} cryptsetup"
+<<<<<<< HEAD
   APT_INCLUDES="${APT_INCLUDES},cryptsetup,busybox,console-setup"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   APT_INCLUDES="${APT_INCLUDES},cryptsetup,busybox,console-setup,cryptsetup-initramfs"
 
   # If cryptfs,dropbear and initramfs are enabled include dropbear-initramfs package
@@ -493,7 +515,10 @@ if [ -n "$MISSING_PACKAGES" ] ; then
   [ "$confirm" != "y" ] && exit 1
 
   # Make sure all missing required packages are installed
+<<<<<<< HEAD
   apt-get -qq -y install `echo "${MISSING_PACKAGES}" | sed "s/ //"`
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   apt-get update && apt-get -qq -y install `echo "${MISSING_PACKAGES}" | sed "s/ //"`
 fi
 
@@ -846,7 +871,10 @@ if [ "$ENABLE_CRYPTFS" = true ] ; then
   echo -n ${CRYPTFS_PASSWORD} > .password
 
   # Initialize encrypted partition
+<<<<<<< HEAD
   echo "YES" | cryptsetup luksFormat "${ROOT_LOOP}" -c "${CRYPTFS_CIPHER}" -s "${CRYPTFS_XTSKEYSIZE}" .password
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   cryptsetup --verbose --debug -q luksFormat "${ROOT_LOOP}" -c "${CRYPTFS_CIPHER}" -h "${CRYPTFS_HASH}" -s "${CRYPTFS_XTSKEYSIZE}" .password
 
   # Open encrypted partition and setup mapping

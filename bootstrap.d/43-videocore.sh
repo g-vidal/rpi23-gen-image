@@ -34,12 +34,18 @@ if [ "$ENABLE_VIDEOCORE" = true ] ; then
   cd "${R}"/tmp/userland/build
 
   if [ "$RELEASE_ARCH" = "arm64" ] ; then
+<<<<<<< HEAD
   cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_BUILD_TYPE=release -DARM64=ON -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_ASM_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE" -DCMAKE_ASM_FLAGS="${CMAKE_ASM_FLAGS} -c" -DVIDEOCORE_BUILD_DIR="${R}" "${R}/tmp/userland"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_BUILD_TYPE=release -DCMAKE_TOOLCHAIN_FILE="${R}"/tmp/userland/makefiles/cmake/toolchains/aarch64-linux-gnu.cmake -DARM64=ON -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_ASM_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE" -DCMAKE_ASM_FLAGS="${CMAKE_ASM_FLAGS} -c" -DVIDEOCORE_BUILD_DIR="${R}" "${R}/tmp/userland"
   fi
 
   if [ "$RELEASE_ARCH" = "armel" ] ; then
+<<<<<<< HEAD
   cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_BUILD_TYPE=release -DCMAKE_C_COMPILER=arm-linux-gnueabi-gcc -DCMAKE_CXX_COMPILER=arm-linux-gnueabi-g++ -DCMAKE_ASM_COMPILER=arm-linux-gnueabi-gcc -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE" -DCMAKE_ASM_FLAGS="${CMAKE_ASM_FLAGS} -c" -DCMAKE_SYSTEM_PROCESSOR="arm" -DVIDEOCORE_BUILD_DIR="${R}" "${R}/tmp/userland"
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   cmake -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_BUILD_TYPE=release -DCMAKE_TOOLCHAIN_FILE="${R}"/tmp/userland/makefiles/cmake/toolchains/arm-linux-gnueabihf.cmake -DCMAKE_C_COMPILER=arm-linux-gnueabi-gcc -DCMAKE_CXX_COMPILER=arm-linux-gnueabi-g++ -DCMAKE_ASM_COMPILER=arm-linux-gnueabi-gcc -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE" -DCMAKE_ASM_FLAGS="${CMAKE_ASM_FLAGS} -c" -DCMAKE_SYSTEM_PROCESSOR="arm" -DVIDEOCORE_BUILD_DIR="${R}" "${R}/tmp/userland"
   fi
 

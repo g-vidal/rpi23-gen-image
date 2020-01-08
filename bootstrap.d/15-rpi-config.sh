@@ -112,7 +112,10 @@ if [ "$ENABLE_TURBO" = true ] ; then
   echo "boot_delay=1" >> "${BOOT_DIR}/config.txt"
 fi
 
+<<<<<<< HEAD
 if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] ; then
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] || [ "$RPI_MODEL" = 4 ]; then
 
   # Bluetooth enabled
@@ -125,10 +128,6 @@ if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] || [ "$
 
     # Copy downloaded sources
     mv "${temp_dir}/pi-bluetooth" "${R}/tmp/"
-
-    # Bluetooth firmware from arch aur https://aur.archlinux.org/packages/pi-bluetooth/
-    as_nobody wget -q -O "${R}/tmp/pi-bluetooth/LICENCE.broadcom_bcm43xx" https://aur.archlinux.org/cgit/aur.git/plain/LICENCE.broadcom_bcm43xx?h=pi-bluetooth
-    as_nobody wget -q -O "${R}/tmp/pi-bluetooth/BCM43430A1.hcd" https://raw.githubusercontent.com/RPi-Distro/bluez-firmware/master/broadcom/BCM43430A1.hcd
 
     # Set permissions
     chown -R root:root "${R}/tmp/pi-bluetooth"
@@ -215,7 +214,10 @@ if [ "$ENABLE_SYSTEMDSWAP" = true ] ; then
 
   # Change into downloaded src dir
   cd "${R}/tmp/systemd-swap" || exit
+<<<<<<< HEAD
 
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   
   # Get Verion
   VERSION=$(git tag | tail -n 1)
@@ -231,7 +233,10 @@ if [ "$ENABLE_SYSTEMDSWAP" = true ] ; then
   chown -R root:root "${R}/tmp/systemd-swap"
 
   # Install package - IMPROVE AND MAKE IT POSSIBLE WITHOUT VERSION NR.
+<<<<<<< HEAD
   chroot_exec dpkg -i /tmp/systemd-swap/systemd-swap_4.0.1_any.deb
+=======
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   chroot_exec dpkg -i /tmp/systemd-swap/systemd-swap_"$VERSION"_all.deb
 
   # Enable service

@@ -92,11 +92,17 @@ if [ "$ENABLE_INITRAMFS" = true ] ; then
     fi
 
     # Add cryptsetup modules to initramfs
+<<<<<<< HEAD
     printf "#\n# CRYPTSETUP: [ y | n ]\n#\n\nCRYPTSETUP=y\n" >> "${ETC_DIR}/initramfs-tools/conf-hook"
     #printf "#\n# CRYPTSETUP: [ y | n ]\n#\n\nCRYPTSETUP=y\n" >> "${ETC_DIR}/initramfs-tools/conf-hook"
 
     # Dummy mapping required by mkinitramfs
     echo "0 1 crypt $(echo "${CRYPTFS_CIPHER}" | cut -d ':' -f 1) ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 0 7:0 4096" | chroot_exec dmsetup create "${CRYPTFS_MAPPING}"
+=======
+    #printf "#\n# CRYPTSETUP: [ y | n ]\n#\n\nCRYPTSETUP=y\n" >> "${ETC_DIR}/initramfs-tools/conf-hook"
+
+    # Dummy mapping required by mkinitramfs
+>>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
     echo "0 1 crypt "${CRYPTFS_CIPHER}" ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 0 7:0 4096" | chroot_exec dmsetup create "${CRYPTFS_MAPPING}"
 
     # Generate initramfs with encrypted root partition support
