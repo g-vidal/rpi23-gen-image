@@ -311,10 +311,6 @@ if [ -n "$SET_ARCH" ] ; then
       
       REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
       RELEASE_ARCH=${RELEASE_ARCH:=armhf}
-<<<<<<< HEAD
-      KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7.img}
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
       
       CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabihf-}
     fi
@@ -405,11 +401,8 @@ fi
 
 # Add deps for nexmon
 if [ "$ENABLE_NEXMON" = true ] ; then
-<<<<<<< HEAD
+
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libgmp3-dev gawk qpdf bison flex make autoconf automake build-essential libtool"
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
-  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libgmp3-dev gawk qpdf make autoconf automake build-essential libtool"
 fi
 
 # Add libncurses5 to enable kernel menuconfig
@@ -425,10 +418,7 @@ fi
 # Add cryptsetup package to enable filesystem encryption
 if [ "$ENABLE_CRYPTFS" = true ]  && [ "$BUILD_KERNEL" = true ] ; then
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} cryptsetup"
-<<<<<<< HEAD
-  APT_INCLUDES="${APT_INCLUDES},cryptsetup,busybox,console-setup"
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
+
   APT_INCLUDES="${APT_INCLUDES},cryptsetup,busybox,console-setup,cryptsetup-initramfs"
 
   # If cryptfs,dropbear and initramfs are enabled include dropbear-initramfs package
@@ -498,10 +488,6 @@ if [ -n "$MISSING_PACKAGES" ] ; then
   [ "$confirm" != "y" ] && exit 1
 
   # Make sure all missing required packages are installed
-<<<<<<< HEAD
-  apt-get -qq -y install `echo "${MISSING_PACKAGES}" | sed "s/ //"`
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   apt-get update && apt-get -qq -y install `echo "${MISSING_PACKAGES}" | sed "s/ //"`
 fi
 
@@ -854,10 +840,7 @@ if [ "$ENABLE_CRYPTFS" = true ] ; then
   echo -n ${CRYPTFS_PASSWORD} > .password
 
   # Initialize encrypted partition
-<<<<<<< HEAD
-  echo "YES" | cryptsetup luksFormat "${ROOT_LOOP}" -c "${CRYPTFS_CIPHER}" -s "${CRYPTFS_XTSKEYSIZE}" .password
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
+
   cryptsetup --verbose --debug -q luksFormat "${ROOT_LOOP}" -c "${CRYPTFS_CIPHER}" -h "${CRYPTFS_HASH}" -s "${CRYPTFS_XTSKEYSIZE}" .password
 
   # Open encrypted partition and setup mapping
