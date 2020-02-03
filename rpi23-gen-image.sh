@@ -66,7 +66,6 @@ SYSTEMDSWAP_URL=${SYSTEMDSWAP_URL:=https://github.com/Nefelim4ag/systemd-swap.gi
 RPI_32_KERNEL_URL=${RPI_32_KERNEL_URL:=https://github.com/hypriot/rpi-kernel/releases/download/v4.14.34/raspberrypi-kernel_20180422-141901_armhf.deb}
 RPI_32_KERNELHEADER_URL=${RPI_32_KERNELHEADER_URL:=https://github.com/hypriot/rpi-kernel/releases/download/v4.14.34/raspberrypi-kernel-headers_20180422-141901_armhf.deb}
 # Kernel has KVM and zswap enabled - use if KERNEL_* parameters and precompiled kernel are used 
-# Default precompiled 64bit kernel
 RPI3_64_BIS_KERNEL_URL=${RPI3_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel-bis/releases/download/4.19.80.20191022/bcmrpi3-kernel-bis-4.19.80.20191022.tar.xz}
 # Default precompiled 64bit kernel
 RPI3_64_DEF_KERNEL_URL=${RPI3_64_DEF_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel/releases/download/4.19.80.20191022/bcmrpi3-kernel-4.19.80.20191022.tar.xz}
