@@ -223,10 +223,6 @@ REDUCE_LOCALE=${REDUCE_LOCALE:=true}
 ENABLE_CRYPTFS=${ENABLE_CRYPTFS:=false}
 CRYPTFS_PASSWORD=${CRYPTFS_PASSWORD:=""}
 CRYPTFS_MAPPING=${CRYPTFS_MAPPING:="secure"}
-<<<<<<< HEAD
-CRYPTFS_CIPHER=${CRYPTFS_CIPHER:="aes-xts-plain64:sha512"}
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 CRYPTFS_CIPHER=${CRYPTFS_CIPHER:="aes-xts-plain64"}
 CRYPTFS_HASH=${CRYPTFS_HASH:="sha512"}
 CRYPTFS_XTSKEYSIZE=${CRYPTFS_XTSKEYSIZE:=512}
@@ -240,20 +236,14 @@ CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
 # Packages required in the chroot build environment
 APT_INCLUDES=${APT_INCLUDES:=""}
-<<<<<<< HEAD
-APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils,locales,keyboard-configuration,console-setup,libnss-systemd"
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
+
 APT_INCLUDES="${APT_INCLUDES},flex,bison,libssl-dev,apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils,locales,keyboard-configuration,console-setup,libnss-systemd"
 
 # Packages to exclude from chroot build environment
 APT_EXCLUDES=${APT_EXCLUDES:=""}
 
 # Packages required for bootstrapping
-<<<<<<< HEAD
-REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus sudo"
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
+
 REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus bison flex libssl-dev sudo"
 MISSING_PACKAGES=""
 
