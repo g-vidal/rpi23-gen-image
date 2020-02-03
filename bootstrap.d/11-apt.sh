@@ -18,7 +18,7 @@ install_readonly files/apt/sources.list "${ETC_DIR}/apt/sources.list"
 sed -i "s/\/ftp.debian.org\//\/${APT_SERVER}\//" "${ETC_DIR}/apt/sources.list"
 
 #Fix for changing path for security updates in testing/bullseye
-if [ "$RELEASE" = "testing" ] ; then
+if [ "$RELEASE" = "testing" ] || [ "$RELEASE" = "bullseye" ]; then
 sed -i "s,stretch\\/updates,testing-security," "${ETC_DIR}/apt/sources.list"
 sed -i "s/ stretch/ ${RELEASE}/" "${ETC_DIR}/apt/sources.list"
 fi
