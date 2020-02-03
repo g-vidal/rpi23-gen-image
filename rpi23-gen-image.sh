@@ -36,7 +36,7 @@ fi
 
 # Introduce settings
 set -e
-echo -n -e "\n#\n# RPi 0/1/2/3/4 Bootstrap Settings\n#\n"
+echo -n -e "\n#\n# RPi 0/1/2/3 Bootstrap Settings\n#\n"
 set -x
 
 # Raspberry Pi model configuration
@@ -236,14 +236,12 @@ CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
 # Packages required in the chroot build environment
 APT_INCLUDES=${APT_INCLUDES:=""}
-
 APT_INCLUDES="${APT_INCLUDES},flex,bison,libssl-dev,apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,dialog,sudo,systemd,sysvinit-utils,locales,keyboard-configuration,console-setup,libnss-systemd"
 
 # Packages to exclude from chroot build environment
 APT_EXCLUDES=${APT_EXCLUDES:=""}
 
 # Packages required for bootstrapping
-
 REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc psmisc dbus bison flex libssl-dev sudo"
 MISSING_PACKAGES=""
 
@@ -401,8 +399,7 @@ fi
 
 # Add deps for nexmon
 if [ "$ENABLE_NEXMON" = true ] ; then
-
-  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libgmp3-dev gawk qpdf bison flex make autoconf automake build-essential libtool"
+  REQUIRED_PACKAGES="${REQUIRED_PACKAGES} libgmp3-dev gawk qpdf make autoconf automake build-essential libtool"
 fi
 
 # Add libncurses5 to enable kernel menuconfig
@@ -418,7 +415,6 @@ fi
 # Add cryptsetup package to enable filesystem encryption
 if [ "$ENABLE_CRYPTFS" = true ]  && [ "$BUILD_KERNEL" = true ] ; then
   REQUIRED_PACKAGES="${REQUIRED_PACKAGES} cryptsetup"
-
   APT_INCLUDES="${APT_INCLUDES},cryptsetup,busybox,console-setup,cryptsetup-initramfs"
 
   # If cryptfs,dropbear and initramfs are enabled include dropbear-initramfs package
@@ -840,7 +836,6 @@ if [ "$ENABLE_CRYPTFS" = true ] ; then
   echo -n ${CRYPTFS_PASSWORD} > .password
 
   # Initialize encrypted partition
-
   cryptsetup --verbose --debug -q luksFormat "${ROOT_LOOP}" -c "${CRYPTFS_CIPHER}" -h "${CRYPTFS_HASH}" -s "${CRYPTFS_XTSKEYSIZE}" .password
 
   # Open encrypted partition and setup mapping
