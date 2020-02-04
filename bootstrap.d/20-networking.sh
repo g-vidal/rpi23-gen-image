@@ -105,11 +105,7 @@ if [ "$ENABLE_WIRELESS" = true ] ; then
   # Create temporary directory for firmware binary blob
   temp_dir=$(as_nobody mktemp -d)
 
-  # Fetch firmware binary blob for RPI3B+
-<<<<<<< HEAD
-  if [ "$RPI_MODEL" = 3P ] ; then
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
+  # Fetch firmware binary blob for RPI3B+ or Pi4
   if [ "$RPI_MODEL" = 3P ] || [ "$RPI_MODEL" = 4 ] ; then
     # Fetch firmware binary blob for RPi3P
     as_nobody wget -q -O "${temp_dir}/brcmfmac43455-sdio.bin" "${WLAN_FIRMWARE_URL}/brcmfmac43455-sdio.bin"

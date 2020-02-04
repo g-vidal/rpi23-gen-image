@@ -128,10 +128,6 @@ if [ "$ENABLE_TURBO" = true ] ; then
   echo "boot_delay=1" >> "${BOOT_DIR}/config.txt"
 fi
 
-<<<<<<< HEAD
-if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] ; then
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
 if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 3 ] || [ "$RPI_MODEL" = 3P ] || [ "$RPI_MODEL" = 4 ]; then
 
   # Bluetooth enabled
@@ -230,10 +226,6 @@ if [ "$ENABLE_SYSTEMDSWAP" = true ] ; then
 
   # Change into downloaded src dir
   cd "${R}/tmp/systemd-swap" || exit
-<<<<<<< HEAD
-
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   
   # Get Verion
   VERSION=$(git tag | tail -n 1)
@@ -249,10 +241,6 @@ if [ "$ENABLE_SYSTEMDSWAP" = true ] ; then
   chown -R root:root "${R}/tmp/systemd-swap"
 
   # Install package - IMPROVE AND MAKE IT POSSIBLE WITHOUT VERSION NR.
-<<<<<<< HEAD
-  chroot_exec dpkg -i /tmp/systemd-swap/systemd-swap_4.0.1_any.deb
-=======
->>>>>>> af203dbe173e4e5ca755058b3284dc61375ca579
   chroot_exec dpkg -i /tmp/systemd-swap/systemd-swap_"$VERSION"_all.deb
 
   # Enable service
