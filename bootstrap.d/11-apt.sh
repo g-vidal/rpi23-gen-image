@@ -27,12 +27,6 @@ else # BUILD_KERNEL=true
   # Install APT sources.list
   install_readonly files/apt/sources.list "${ETC_DIR}/apt/sources.list"
 
-  # Use specified APT server and release
-  sed -i "s/\/ftp.debian.org\//\/${APT_SERVER}\//" "${ETC_DIR}/apt/sources.list"
-  sed -i "s/ jessie/ ${RELEASE}/" "${ETC_DIR}/apt/sources.list"
-fi
-
-
 # Use specified APT server and release
 sed -i "s/\/ftp.debian.org\//\/${APT_SERVER}\//" "${ETC_DIR}/apt/sources.list"
 
