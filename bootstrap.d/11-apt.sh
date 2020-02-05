@@ -36,7 +36,7 @@ fi
 # Use specified APT server and release
 sed -i "s/\/ftp.debian.org\//\/${APT_SERVER}\//" "${ETC_DIR}/apt/sources.list"
 
-#Fix for changing path for security updates in testing/bullseye
+#Fix for changing path for security updates in testing
 if [ "$RELEASE" = "testing" ] ; then
 sed -i "s,buster\\/updates,testing-security," "${ETC_DIR}/apt/sources.list"
 sed -i "s/ buster/ ${RELEASE}/" "${ETC_DIR}/apt/sources.list"

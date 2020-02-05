@@ -2,7 +2,7 @@
 ########################################################################
 # rpi23-gen-image.sh					       2015-2017
 #
-# Advanced Debian "stretch" and "buster" bootstrap script for Raspberry Pi
+# Advanced Debian "buster" and "bullseye" bootstrap script for Raspberry Pi
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -36,11 +36,11 @@ fi
 
 # Introduce settings
 set -e
-echo -n -e "\n#\n# RPi 0/1/2/3 Bootstrap Settings\n#\n"
+echo -n -e "\n#\n# RPi 0/1/2/3/4 Bootstrap Settings\n#\n"
 set -x
 
 # Raspberry Pi model configuration
-RPI_MODEL=${RPI_MODEL:=2}
+RPI_MODEL=${RPI_MODEL:=3}
 
 # Debian release
 RELEASE=${RELEASE:=buster}

@@ -20,9 +20,9 @@ fi
 
 
 # Exclude packages if required by Debian release
-if [ "$RELEASE" = "stretch" ] || [ "$RELEASE" = "buster" ] ; then
-  EXCLUDES="--exclude=init,systemd-sysv"
-fi
+#if [ "$RELEASE" = "stretch" ] || [ "$RELEASE" = "buster" ] ; then
+#  APT_EXCLUDES="--exclude=init,systemd-sysv"
+#fi
   
 
 # Base debootstrap (unpack only)
