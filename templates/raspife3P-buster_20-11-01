@@ -1,0 +1,148 @@
+#
+# Configuration file raspi3 Buster IFÉ 2020/11/01
+#
+#---------------------
+#--- APT settings ----
+#---------------------
+APT_SERVER=ftp.fr.debian.org
+APT_INCLUDES="jed terminator nginx curl wget htop"
+APT_INCLUDES_LATE="pcre2-utils libpcre3-dev \
+openjdk-11-jdk openjdk-11-jre openjdk-11-jdk-headless openjdk-11-jre-headless \
+libpython3-all-dev bison byacc python-pip python3-pip python-pkgconfig python3-pkgconfig \
+python3-netcdf4 python-netcdf4 python-libxml2 libxslt1-dev python-libxslt1 \
+libxml2 libjavascriptcoregtk-4.0-dev \
+libffi-dev screen sqlite3 libsqlite3-dev liblua5.3-dev doxygen libftdi-dev \
+libconfuse-dev libcereal-dev libopenblas-dev libnetcdf-dev libhdf5-dev \
+git lxdm pcmanfm-qt libffi-dev tightvncserver \
+libssl-dev python-openssl python3-openssl libcrypto++-dev \
+mate-backgrounds gnome-backgrounds \
+fcgiwrap automake libtool libboost1.67-dev \
+php-fpm  libfcgi-dev php7.3-mysql icedtea-netx \
+tigervnc-standalone-server tigervnc-common \
+docker.io openvswitch-switch wireshark imagemagick tk tcllib util-linux \
+xfonts-base fonts-liberation gsfonts libxfont-dev libfontenc-dev \
+ttf-mscorefonts-installer xfonts-100dpi xfonts-75dpi xfonts-base \
+xfonts-utils"
+#-------------------------------
+#--- General System Settings ---
+#-------------------------------
+SET_ARCH=32
+RPI_MODEL=3P 
+RELEASE="buster"
+HOSTNAME="raspife3P"
+DEFLOCAL="fr_FR.UTF-8"
+TIMEZONE="Europe/Paris"
+EXPANDROOT=false
+#---------------------
+#--- User Settings ---
+#---------------------
+ENABLE_ROOT=false
+ROOT_PASSWORD="Achanger1$"
+ENABLE_USER=true
+USER_NAME=ens-ife
+USER_PASSWORD="AChanger1$"
+#-------------------------
+#--- Keyboard Settings ---
+#-------------------------
+XKB_MODEL="pc105" 
+XKB_LAYOUT="fr" 
+XKB_VARIANT="latin9" 
+XKB_OPTIONS=""
+#------------------------
+#--- Network Settings ---
+#------------------------
+ENABLE_IPV6=true
+ENABLE_WIRELESS=true
+ENABLE_IPTABLES=false
+ENABLE_IFNAMES=true
+ENABLE_HARDNET=true
+ENABLE_ETH_DHCP=true
+ENABLE_WIFI_DHCP=true
+NET_WIFI_SSID=MobileClimatEtMeteo
+NET_WIFI_PSK=ClimatEtMeteo
+#---------------------
+#--- Basic features---
+#---------------------
+ENABLE_CONSOLE=false
+ENABLE_BLUETOOTH=false
+ENABLE_MINIUART_OVERLAY=false
+ENABLE_TURBO=false
+ENABLE_I2C=true
+ENABLE_SPI=true
+SSH_ENABLE=true
+ENABLE_NONFREE=true
+ENABLE_RSYSLOG=true
+ENABLE_SOUND=true
+ENABLE_HWRANDOM=true
+ENABLE_MINGPU=true
+ENABLE_XORG=true
+ENABLE_WM="lxqt"
+ENABLE_SYSVINIT=true
+ENABLE_SPLASH=true
+ENABLE_LOGO=true
+ENABLE_SILENT_BOOT=false
+#--------------------------------
+#--- Advanced System features ---
+#--------------------------------
+ENABLE_DPHYSSWAP=false
+ENABLE_QEMU=false
+ENABLE_MINBASE=false
+ENABLE_SPLITFS=false
+ENABLE_INITRAMFS=true
+ENABLE_DBUS=true 
+ENABLE_USBBOOT=false
+ENABLE_UBOOT=false
+ENABLE_FBTURBO=true
+ENABLE_VIDEOCORE=true
+ENABLE_NEXMON=false
+#--------------------
+#--- ssh settings ---
+#--------------------
+SSH_ENABLE_ROOT=false
+SSH_DISABLE_PASSWORD_AUTH=false
+SSH_LIMIT_USERS=false
+SSH_ROOT_PUB_KEY="/home/vidal/.ssh/authorized_keys"
+SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
+#-----------------------
+#--- Kernel settings ---
+#-----------------------
+BUILD_KERNEL=true
+KERNEL_BRANCH=rpi-4.19.y
+KERNEL_REDUCE=false
+KERNEL_HEADERS=true
+KERNEL_MENUCONFIG=false
+KERNEL_CCACHE=true
+KERNEL_REMOVESRC=true
+KERNELSRC_CLEAN=true
+KERNELSRC_CONFIG=true
+KERNEL_DEFAULT_GOV=ondemand
+KERNEL_VIRT=false
+KERNEL_SECURITY=false
+KERNEL_DHKEY=true
+#------------------------
+#--- Reduce disk usage --
+#------------------------
+ENABLE_REDUCE=false
+REDUCE_APT=false 
+REDUCE_DOC=true 
+REDUCE_MAN=false 
+REDUCE_VIM=false
+REDUCE_BASH=false
+REDUCE_HWDB=false
+REDUCE_BASH=false 
+REDUCE_SSHD=false
+REDUCE_LOCALE=false
+REDUCE_KERNEL=false
+#--------------------------------
+#--- Encrypted root partition ---
+#--------------------------------
+ENABLE_CRYPTFS=false
+#----------------------
+#--- Build settings ---
+#----------------------
+BASEDIR=/data/RpiGenImage/Images/${RELEASE}
+#BASEDIR=/media/*******/*********/Nano-Ordinateurs/RaspberryPi/RpiGenImage/Images/${RELEASE}
+DATE=`date +%Y-%m-%d`
+IMAGE_NAME=${BASEDIR}/${DATE}-rpi${RPI_MODEL}-${RELEASE}
+
+
