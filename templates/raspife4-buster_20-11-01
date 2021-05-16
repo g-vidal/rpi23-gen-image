@@ -13,7 +13,7 @@ python3-netcdf4 python-netcdf4 python-libxml2 libxslt1-dev python-libxslt1 \
 libxml2 libjavascriptcoregtk-4.0-dev \
 libffi-dev screen sqlite3 libsqlite3-dev liblua5.3-dev doxygen libftdi-dev \
 libconfuse-dev libcereal-dev libopenblas-dev libnetcdf-dev libhdf5-dev \
-git lxdm pcmanfm-qt libffi-dev tightvncserver \
+git lxdm pcmanfm-qt libffi-dev ffmpeg \
 libssl-dev python-openssl python3-openssl libcrypto++-dev \
 mate-backgrounds gnome-backgrounds \
 fcgiwrap automake libtool libboost1.67-dev \
@@ -22,12 +22,13 @@ tigervnc-standalone-server tigervnc-common \
 docker.io openvswitch-switch wireshark imagemagick tk tcllib util-linux \
 xfonts-base fonts-liberation gsfonts libxfont-dev libfontenc-dev \
 ttf-mscorefonts-installer xfonts-100dpi xfonts-75dpi xfonts-base \
+autogen automake libtool libboost-system-dev libboost-thread-dev \
 xfonts-utils"
 #-------------------------------
 #--- General System Settings ---
 #-------------------------------
-SET_ARCH=32
 RPI_MODEL=4 
+SET_ARCH=32
 RELEASE="buster"
 HOSTNAME="raspife4"
 DEFLOCAL="fr_FR.UTF-8"
@@ -107,7 +108,7 @@ SSH_USER_PUB_KEY="/home/vidal/.ssh/authorized_keys"
 #--- Kernel settings ---
 #-----------------------
 BUILD_KERNEL=true
-KERNEL_BRANCH=rpi-4.19.y
+KERNEL_BRANCH=rpi-5.4.y
 KERNEL_REDUCE=false
 KERNEL_HEADERS=true
 KERNEL_MENUCONFIG=false

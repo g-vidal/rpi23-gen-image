@@ -13,15 +13,16 @@ python3-netcdf4 python-netcdf4 python-libxml2 libxslt1-dev python-libxslt1 \
 libxml2 libjavascriptcoregtk-4.0-dev \
 libffi-dev screen sqlite3 libsqlite3-dev liblua5.3-dev doxygen libftdi-dev \
 libconfuse-dev libcereal-dev libopenblas-dev libnetcdf-dev libhdf5-dev \
-git lxdm pcmanfm-qt libffi-dev tightvncserver \
+git lxdm pcmanfm-qt libffi-dev ffmpeg \
 libssl-dev python-openssl python3-openssl libcrypto++-dev \
-mate-backgrounds gnome-backgrounds \
+mate-backgrounds gnome-backgrounds libjson-c-dev \
 fcgiwrap automake libtool libboost1.67-dev \
 php-fpm  libfcgi-dev php7.3-mysql icedtea-netx \
 tigervnc-standalone-server tigervnc-common \
 docker.io openvswitch-switch wireshark imagemagick tk tcllib util-linux \
 xfonts-base fonts-liberation gsfonts libxfont-dev libfontenc-dev \
 ttf-mscorefonts-installer xfonts-100dpi xfonts-75dpi xfonts-base \
+autogen automake libtool libboost-system-dev libboost-thread-dev \
 xfonts-utils"
 #-------------------------------
 #--- General System Settings ---
