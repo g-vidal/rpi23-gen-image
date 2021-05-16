@@ -2,7 +2,7 @@
 ########################################################################
 # rpi23-gen-image.sh					       2015-2017
 #
-# Advanced Debian "stretch" and "buster" bootstrap script for Raspberry Pi
+# Advanced Debian "buster" and "bullseye" bootstrap script for Raspberry Pi
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -65,7 +65,7 @@ SYSTEMDSWAP_URL=${SYSTEMDSWAP_URL:=https://github.com/Nefelim4ag/systemd-swap.gi
 # Kernel deb packages for 32bit kernel
 RPI_32_KERNEL_URL=${RPI_32_KERNEL_URL:=https://github.com/hypriot/rpi-kernel/releases/download/v4.14.34/raspberrypi-kernel_20180422-141901_armhf.deb}
 RPI_32_KERNELHEADER_URL=${RPI_32_KERNELHEADER_URL:=https://github.com/hypriot/rpi-kernel/releases/download/v4.14.34/raspberrypi-kernel-headers_20180422-141901_armhf.deb}
-# Kernel has KVM and zswap enabled - use if KERNEL_* parameters and precompiled kernel are used 
+# Kernel has KVM and zswap enabled - use if KERNEL_* parameters and precompiled kernel are used
 RPI3_64_BIS_KERNEL_URL=${RPI3_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel-bis/releases/download/4.19.102.20200211/bcmrpi3-kernel-bis-4.19.102.20200211.tar.xz}
 # Default precompiled 64bit kernel
 RPI3_64_DEF_KERNEL_URL=${RPI3_64_DEF_KERNEL_URL:=https://github.com/sakaki-/bcmrpi3-kernel/releases/download/4.19.102.20200211/bcmrpi3-kernel-4.19.102.20200211.tar.xz}
@@ -73,7 +73,7 @@ RPI3_64_DEF_KERNEL_URL=${RPI3_64_DEF_KERNEL_URL:=https://github.com/sakaki-/bcmr
 RPI4_64_BIS_KERNEL_URL=${RPI4_64_BIS_KERNEL_URL:=https://github.com/sakaki-/bcm2711-kernel-bis/releases/download/4.19.102.20200211/bcm2711-kernel-bis-4.19.102.20200211.tar.xz}
 # Default precompiled 64bit kernel - https://github.com/sakaki-/bcm2711-kernel
 RPI4_64_DEF_KERNEL_URL=${RPI4_64_DEF_KERNEL_URL:=https://github.com/sakaki-/bcm2711-kernel-bis/releases/download/4.19.102.20200211/bcm2711-kernel-bis-4.19.102.20200211.tar.xz}
-# Generic 
+# Generic
 RPI3_64_KERNEL_URL=${RPI3_64_KERNEL_URL:=$RPI3_64_DEF_KERNEL_URL}
 RPI4_64_KERNEL_URL=${RPI4_64_KERNEL_URL:=$RPI4_64_DEF_KERNEL_URL}
 # Kali kernel src - used if ENABLE_NEXMON=true (they patch the wlan kernel modul)
@@ -285,7 +285,7 @@ if [ -n "$SET_ARCH" ] ; then
       else
         KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcm2711_defconfig}
       fi
-      
+
       REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-arm64"
       RELEASE_ARCH=${RELEASE_ARCH:=arm64}
       KERNEL_IMAGE=${KERNEL_IMAGE:=kernel8.img}
@@ -311,7 +311,7 @@ if [ -n "$SET_ARCH" ] ; then
       RELEASE_ARCH=${RELEASE_ARCH:=armel}
       KERNEL_IMAGE=${KERNEL_IMAGE:=kernel.img}
       CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabi-}
-	  
+
 	  if [ $ENABLE_XORG = true ] ; then
 	    if [$RELEASE = "stretch" ] || [$RELEASE = "oldstable" ] ; then
 	      printf "\nBest support for armel architecture is provided under Debian stretch/oldstable. Choose yes to change release to Debian stretch[y/n] "
@@ -331,10 +331,10 @@ if [ -n "$SET_ARCH" ] ; then
         KERNEL_DEFCONFIG=${KERNEL_DEFCONFIG:=bcm2711_defconfig}
 		KERNEL_IMAGE=${KERNEL_IMAGE:=kernel7l.img}
       fi
-      
+
       REQUIRED_PACKAGES="${REQUIRED_PACKAGES} crossbuild-essential-armhf"
       RELEASE_ARCH=${RELEASE_ARCH:=armhf}
-      
+
       CROSS_COMPILE=${CROSS_COMPILE:=arm-linux-gnueabihf-}
     fi
   fi
@@ -447,7 +447,7 @@ if [ "$ENABLE_CRYPTFS" = true ]  && [ "$BUILD_KERNEL" = true ] ; then
   if [ "$CRYPTFS_DROPBEAR" = true ] && [ "$ENABLE_INITRAMFS" = true ]; then
     APT_INCLUDES="${APT_INCLUDES},dropbear-initramfs"
   fi
-  
+
   if [ -z "$CRYPTFS_PASSWORD" ] ; then
     echo "error: no password defined (CRYPTFS_PASSWORD)!"
     exit 1
@@ -465,7 +465,7 @@ if [ "$ENABLE_UBOOT" = true ] ; then
   APT_INCLUDES="${APT_INCLUDES},device-tree-compiler,bc"
 fi
 
-if [ "$ENABLE_USBBOOT" = true ] ; then 
+if [ "$ENABLE_USBBOOT" = true ] ; then
   if [ "$RPI_MODEL" = 0 ] || [ "$RPI_MODEL" = 1P ] || [ "$RPI_MODEL" = 1 ] || [ "$RPI_MODEL" = 2 ]; then
     echo "error: Booting from USB alone is only supported by Raspberry Pi 3 and 3P"
     exit 1
